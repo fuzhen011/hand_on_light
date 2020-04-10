@@ -748,6 +748,7 @@ static void print_float(float number)
     log("< %ld", INT32_MIN);
   } else {
     uint16_t fraction = (number > 0 ? number - (int32_t)number : (int32_t)number - number) * 1000;
+    (void)fraction;
     log("%ld.%03u",
         (int32_t)number,
         fraction);

@@ -48,6 +48,10 @@
 #define log(...)
 #endif
 
+#undef SUB_MODULE_NAME
+#define SUB_MODULE_NAME "app"
+#include "lab.h"
+
 /***********************************************************************************************//**
  * @addtogroup Application
  * @{
@@ -168,7 +172,9 @@ void gecko_bgapi_classes_init(void)
   //gecko_bgapi_class_mesh_vendor_model_init();
   //gecko_bgapi_class_mesh_health_client_init();
   //gecko_bgapi_class_mesh_health_server_init();
-  //gecko_bgapi_class_mesh_test_init();
+  gecko_bgapi_class_mesh_test_init();
+  gecko_bgapi_class_mesh_sensor_server_init();
+  gecko_bgapi_class_mesh_sensor_setup_server_init();
   //gecko_bgapi_class_mesh_lpn_init();
   gecko_bgapi_class_mesh_friend_init();
   gecko_bgapi_class_mesh_lc_server_init();
@@ -252,6 +258,7 @@ void handle_gecko_event(uint32_t evt_id, struct gecko_cmd_packet *evt)
 
       struct gecko_msg_mesh_node_initialized_evt_t *pData = (struct gecko_msg_mesh_node_initialized_evt_t *)&(evt->data);
 
+      self_config(pData);
       if (pData->provisioned) {
         log("node is provisioned. address:%x, ivi:%ld\r\n", pData->address, pData->ivi);
 
