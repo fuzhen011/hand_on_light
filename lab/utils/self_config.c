@@ -6,6 +6,7 @@
  ************************************************************************/
 
 /* Includes *********************************************************** */
+#include "native_gecko.h"
 #undef SUB_MODULE_NAME
 #define SUB_MODULE_NAME "self_config"
 #include "lab.h"
@@ -14,7 +15,11 @@
 
 /* Defines  *********************************************************** */
 #define PRIMARY_SUBNET  0
+
 #define SELF_CFG_ADDR 0x0005
+
+#define TYPE_NETKEY 0
+#define TYPE_APPKEY 1
 /* Global Variables *************************************************** */
 
 /* Static Variables *************************************************** */
@@ -66,7 +71,7 @@ void self_config(const struct gecko_msg_mesh_node_initialized_evt_t *evt)
    *  - Bind Appkey to Models
    *
    */
-  mtgkc = gecko_cmd_mesh_test_get_key_count(1); /* 1 for application key */
+  mtgkc = gecko_cmd_mesh_test_get_key_count(TYPE_APPKEY); /* 1 for application key */
   BG_AST(mtgkc->result);
   if (mtgkc->count) {
     /* Already configured */
@@ -75,7 +80,7 @@ void self_config(const struct gecko_msg_mesh_node_initialized_evt_t *evt)
   }
 
   /* Add appkey */
-  BG_AST(gecko_cmd_mesh_test_add_local_key(1,
+  BG_AST(gecko_cmd_mesh_test_add_local_key(TYPE_APPKEY,
                                            key,
                                            0,
                                            PRIMARY_SUBNET)->result);
@@ -87,5 +92,22 @@ void self_config(const struct gecko_msg_mesh_node_initialized_evt_t *evt)
                                                     0xFFFF,
                                                     model_info[i].model)->result);
   }
-    LOGI("Configured.\n");
+  LOGI("Configured.\n");
+}
+
+void on_appkey_added(const struct gecko_msg_mesh_node_key_added_evt_t *evt)
+{
+  if (evt->type == TYPE_NETKEY) {
+    return;
+  }
+#if 0
+  BG_AST(gecko_cmd_mesh_test_bind_local_model_app(0,
+                                                  0,
+                                                  0xFFFF,
+                                                  MESH_SENSOR_SETUP_SERVER_MODEL_ID)->result);
+#endif
+  BG_AST(gecko_cmd_mesh_test_bind_local_model_app(0,
+                                                  0,
+                                                  0xFFFF,
+                                                  MESH_SENSOR_SERVER_MODEL_ID)->result);
 }
