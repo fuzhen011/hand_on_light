@@ -1,5 +1,5 @@
 /* Includes *********************************************************** */
-#include "sensor_server.h"
+#include "lab.h"
 #include "gpiointerrupt.h"
 
 #include "native_gecko.h"
@@ -36,9 +36,46 @@ extern uint16_t get_primary_elem_addr(void);
 /* Static Variables *************************************************** */
 static lc_sensors_t sensor_states = { 0 };
 
+static const sensor_descriptor_t sensor_des[] = {
+  {
+    .property_id = PEOPLE_COUNT,
+    .positive_tolerance = TOLERANCE_UNSPECIFIED,
+    .negative_tolerance = TOLERANCE_UNSPECIFIED,
+    .sampling_function = SAMPLING_UNSPECIFIED,
+    .measurement_period = MEASUREMENT_PERIOD_UNDEFINED,
+    .update_interval = UPDATE_INTERVAL_UNDEFINED
+  },
+  {
+    .property_id = PRESENT_AMBIENT_LIGHT_LEVEL,
+    .positive_tolerance = TOLERANCE_UNSPECIFIED,
+    .negative_tolerance = TOLERANCE_UNSPECIFIED,
+    .sampling_function = SAMPLING_UNSPECIFIED,
+    .measurement_period = MEASUREMENT_PERIOD_UNDEFINED,
+    .update_interval = UPDATE_INTERVAL_UNDEFINED
+  },
+};
+
 /* Static Functions Declaractions ************************************* */
 static void button_init(void);
 static void enable_button_interrupts(void);
+static void people_count_init(void);
+static void ambient_light_init(void);
+
+void sensors_init(void)
+{
+  uint16_t ret;
+
+  ret = mesh_lib_sensor_server_init(SENSOR_ELEMENT,
+                                    sizeof(sensor_des) / sizeof(sensor_descriptor_t),
+                                    sensor_des);
+
+  BG_AST(ret);
+
+  people_count_init();
+  ambient_light_init();
+
+  LOGD("Sensors Initialized\n");
+}
 
 static void people_count_init(void)
 {

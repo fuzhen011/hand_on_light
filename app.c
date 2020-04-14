@@ -48,6 +48,7 @@
 #define log(...)
 #endif
 
+#include "thunderboard/util.h"
 #undef SUB_MODULE_NAME
 #define SUB_MODULE_NAME "app"
 #include "lab.h"
@@ -135,6 +136,7 @@ static void set_device_name(bd_addr *pAddr)
  *
  * @param[in] pEvt  Pointer to mesh_lib_generic_server_state_changed event.
  ******************************************************************************/
+#if 0
 static void server_state_changed(struct gecko_msg_mesh_generic_server_state_changed_evt_t *pEvt)
 {
   int i;
@@ -146,6 +148,7 @@ static void server_state_changed(struct gecko_msg_mesh_generic_server_state_chan
   }
   log("\r\n");
 }
+#endif
 
 /*******************************************************************************
  * Initialise used bgapi classes.
@@ -217,6 +220,9 @@ void handle_gecko_event(uint32_t evt_id, struct gecko_cmd_packet *evt)
 
         // re-initialize LEDs (needed for those radio board that share same GPIO for button/LED)
         LEDS_init();
+
+        UTIL_init();
+        sensors_init();
       }
       break;
 
