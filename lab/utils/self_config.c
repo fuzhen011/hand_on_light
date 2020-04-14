@@ -106,8 +106,10 @@ void on_appkey_added(const struct gecko_msg_mesh_node_key_added_evt_t *evt)
                                                   0xFFFF,
                                                   MESH_SENSOR_SETUP_SERVER_MODEL_ID)->result);
 #endif
-  BG_AST(gecko_cmd_mesh_test_bind_local_model_app(0,
-                                                  0,
+  BG_AST(gecko_cmd_mesh_test_bind_local_model_app(SENSOR_SERVER_MODEL_ELEMENT_INDEX,
+                                                  evt->index,
                                                   0xFFFF,
                                                   MESH_SENSOR_SERVER_MODEL_ID)->result);
+  LOGI("Appkey %u has been bound to sensor server model\n",
+       evt->index);
 }

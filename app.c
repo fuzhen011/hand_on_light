@@ -88,7 +88,7 @@ static uint8_t init_done = 0;
  ******************************************************************************/
 static void initiate_factory_reset(void)
 {
-  log("factory reset\r\n");
+  LOGW("factory reset\r\n");
   DI_Print("\n***\nFACTORY RESET\n***", DI_ROW_STATUS);
 
   /* if connection is open then close it before rebooting */
@@ -248,19 +248,19 @@ void handle_gecko_event(uint32_t evt_id, struct gecko_cmd_packet *evt)
       break;
 
     case gecko_evt_mesh_node_initialized_id:
-      log("node initialized\r\n");
+      LOGD("node initialized\r\n");
 
       // Initialize generic server models
       result = gecko_cmd_mesh_generic_server_init()->result;
       if (result) {
-        log("mesh_generic_server_init failed, code 0x%x\r\n", result);
+        LOGE("mesh_generic_server_init failed, code 0x%x\r\n", result);
       }
 
       struct gecko_msg_mesh_node_initialized_evt_t *pData = (struct gecko_msg_mesh_node_initialized_evt_t *)&(evt->data);
 
-      self_config(pData);
+      /* self_config(pData); */
       if (pData->provisioned) {
-        log("node is provisioned. address:%x, ivi:%ld\r\n", pData->address, pData->ivi);
+        LOGD("node is provisioned. address:%x, ivi:%ld\r\n", pData->address, pData->ivi);
 
         _my_address = pData->address;
         lightbulb_state_init();
@@ -268,16 +268,16 @@ void handle_gecko_event(uint32_t evt_id, struct gecko_cmd_packet *evt)
 
         DI_Print("provisioned", DI_ROW_STATUS);
       } else {
-        log("node is unprovisioned\r\n");
+        LOGI("node is unprovisioned\r\n");
         DI_Print("unprovisioned", DI_ROW_STATUS);
 
-        log("starting unprovisioned beaconing...\r\n");
+        LOGD("starting unprovisioned beaconing...\r\n");
         gecko_cmd_mesh_node_start_unprov_beaconing(0x3);   // enable ADV and GATT provisioning bearer
       }
       break;
 
     case gecko_evt_mesh_node_provisioning_started_id:
-      log("Started provisioning\r\n");
+      LOGD("Started provisioning\r\n");
       DI_Print("provisioning...", DI_ROW_STATUS);
       // start timer for blinking LEDs to indicate which node is being provisioned
       gecko_cmd_hardware_set_soft_timer(32768 / 4, TIMER_ID_PROVISIONING, 0);
@@ -286,14 +286,14 @@ void handle_gecko_event(uint32_t evt_id, struct gecko_cmd_packet *evt)
     case gecko_evt_mesh_node_provisioned_id:
       lightbulb_state_init();
       init_done = 1;
-      log("node provisioned, got address=%x\r\n", evt->data.evt_mesh_node_provisioned.address);
+      LOGI("node provisioned, got address=%x\r\n", evt->data.evt_mesh_node_provisioned.address);
       // stop LED blinking when provisioning complete
       gecko_cmd_hardware_set_soft_timer(0, TIMER_ID_PROVISIONING, 0);
       DI_Print("provisioned", DI_ROW_STATUS);
       break;
 
     case gecko_evt_mesh_node_provisioning_failed_id:
-      log("provisioning failed, code %x\r\n", evt->data.evt_mesh_node_provisioning_failed.result);
+      LOGE("provisioning failed, code %x\r\n", evt->data.evt_mesh_node_provisioning_failed.result);
       DI_Print("prov failed", DI_ROW_STATUS);
       /* start a one-shot timer that will trigger soft reset after small delay */
       gecko_cmd_hardware_set_soft_timer(2 * 32768, TIMER_ID_RESTART, 1);
@@ -302,6 +302,7 @@ void handle_gecko_event(uint32_t evt_id, struct gecko_cmd_packet *evt)
     case gecko_evt_mesh_node_key_added_id:
       log("got new %s key with index %x\r\n", evt->data.evt_mesh_node_key_added.type == 0 ? "network" : "application",
           evt->data.evt_mesh_node_key_added.index);
+      on_appkey_added(&evt->data.evt_mesh_node_key_added);
       break;
 
     case gecko_evt_mesh_node_model_config_changed_id:
@@ -353,7 +354,7 @@ void handle_gecko_event(uint32_t evt_id, struct gecko_cmd_packet *evt)
       break;
 
     case gecko_evt_mesh_node_reset_id:
-      log("evt gecko_evt_mesh_node_reset_id\r\n");
+      LOGW("evt gecko_evt_mesh_node_reset_id\r\n");
       initiate_factory_reset();
       break;
 
@@ -372,14 +373,14 @@ void handle_gecko_event(uint32_t evt_id, struct gecko_cmd_packet *evt)
       break;
 
     case gecko_evt_le_connection_opened_id:
-      log("evt:gecko_evt_le_connection_opened_id\r\n");
+      LOGD("evt:gecko_evt_le_connection_opened_id\r\n");
       num_connections++;
       conn_handle = evt->data.evt_le_connection_opened.connection;
       DI_Print("connected", DI_ROW_CONNECTION);
       break;
 
     case gecko_evt_le_connection_parameters_id:
-      log("evt:gecko_evt_le_connection_parameters_id\r\n");
+      LOGD("evt:gecko_evt_le_connection_parameters_id\r\n");
       break;
 
     case gecko_evt_le_connection_closed_id:
@@ -389,7 +390,7 @@ void handle_gecko_event(uint32_t evt_id, struct gecko_cmd_packet *evt)
         gecko_cmd_system_reset(2);
       }
 
-      log("evt:conn closed, reason 0x%x\r\n", evt->data.evt_le_connection_closed.reason);
+      LOGW("evt:conn closed, reason 0x%x\r\n", evt->data.evt_le_connection_closed.reason);
       conn_handle = 0xFF;
       if (num_connections > 0) {
         if (--num_connections == 0) {

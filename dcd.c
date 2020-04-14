@@ -32,7 +32,7 @@ const uint8_t __mesh_dcd[] = {
     0x07, 0x00, /* Features Bitmask = 0x0007 */
     /* Begin Primary Element */
         0x00, 0x00, /* Location = 0x0000 */
-        0x0d, /* Number of SIG Models = 0x0d */
+        0x0f, /* Number of SIG Models = 0x0f */
         0x00, /* Number of Vendor Models = 0x00 */
         /* Begin SIG Models */
         0x00, 0x00, /* Configuration Server */
@@ -48,6 +48,8 @@ const uint8_t __mesh_dcd[] = {
         0x04, 0x13, /* Light CTL Setup Server */
         0x03, 0x12, /* Scene Server */
         0x04, 0x12, /* Scene Setup Server */
+        0x00, 0x11, /* Sensor Server */
+        0x01, 0x11, /* Sensor Setup Server */
         /* End SIG Models */
         /* Begin Vendor Models */
         /* End Vendor Models */
