@@ -39,6 +39,9 @@
 #define log(...)
 #endif
 
+#undef SUB_MODULE_NAME
+#define SUB_MODULE_NAME "lctl"
+#include "lab.h"
 /***********************************************************************************************//**
  * @addtogroup Lightbulb
  * @{
@@ -975,13 +978,13 @@ static void lightness_request(uint16_t model_id,
       break;
   }
 
-  log("lightness_request: level=%u, transition=%lu, delay=%u\r\n",
+  LOGD("lightness_request: level=%u, transition=%lu, delay=%u\r\n",
       actual_request, transition_ms, delay_ms);
 
   if (lightbulb_state.lightness_current == actual_request) {
-    log("Request for current state received; no op\r\n");
+    LOGD("Request for current state received; no op\r\n");
   } else {
-    log("Setting lightness to <%u>\r\n", actual_request);
+    LOGD("Setting lightness to <%u>\r\n", actual_request);
     if (transition_ms == 0 && delay_ms == 0) { // Immediate change
       lightbulb_state.lightness_current = actual_request;
       lightbulb_state.lightness_target = actual_request;
@@ -1054,16 +1057,16 @@ static void lightness_change(uint16_t model_id,
 {
   if (current->kind != mesh_lighting_state_lightness_actual) {
     // if kind is not 'actual' then just report the change here, no change to light state
-    log("lightness change, kind %u, value %u\r\n", current->kind, current->lightness.level);
+    LOGD("lightness change, kind %u, value %u\r\n", current->kind, current->lightness.level);
     return;
   }
 
   if (lightbulb_state.lightness_current != current->lightness.level) {
-    log("lightness_change: from %u to %u\r\n", lightbulb_state.lightness_current, current->lightness.level);
+    LOGD("lightness_change: from %u to %u\r\n", lightbulb_state.lightness_current, current->lightness.level);
     lightbulb_state.lightness_current = current->lightness.level;
     lightbulb_state_changed();
   } else {
-    log("lightness update -same value (%d)\r\n", lightbulb_state.lightness_current);
+    LOGD("lightness update -same value (%d)\r\n", lightbulb_state.lightness_current);
   }
 }
 

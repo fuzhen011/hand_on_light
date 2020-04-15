@@ -104,6 +104,10 @@ static void initiate_factory_reset(void)
   gecko_cmd_hardware_set_soft_timer(2 * 32768, TIMER_ID_FACTORY_RESET, 1);
 }
 
+uint16_t get_primary_elem_addr(void)
+{
+  return _my_address;
+}
 /***************************************************************************//**
  * Set device name in the GATT database. A unique name is generated using
  * the two last bytes from the Bluetooth address of this device. Name is also
@@ -203,6 +207,10 @@ void handle_gecko_event(uint32_t evt_id, struct gecko_cmd_packet *evt)
 
   switch (evt_id) {
     case gecko_evt_system_boot_id:
+      LOGI("System Booted.\n"
+           "  Compiled %s - %s\n",
+           __DATE__,
+           __TIME__);
       // check pushbutton state at startup. If either PB0 or PB1 is held down then do factory reset
       if (GPIO_PinInGet(BSP_BUTTON0_PORT, BSP_BUTTON0_PIN) == 0 || GPIO_PinInGet(BSP_BUTTON1_PORT, BSP_BUTTON1_PIN) == 0) {
         initiate_factory_reset();
@@ -244,7 +252,13 @@ void handle_gecko_event(uint32_t evt_id, struct gecko_cmd_packet *evt)
             LEDS_SetState(LED_STATE_PROV);
           }
           break;
+        case PEOPLE_COUNT_TIMER_ID:
+          send_people_count();
+          break;
 
+        case AMBIENT_LIGHT_SENSOR_TIMER_ID:
+          ambient_light_send(0);
+          break;
         default:
           // lightbulb related timer events are handled by separate function
           handle_lightbulb_timer_evt(evt);
@@ -273,6 +287,7 @@ void handle_gecko_event(uint32_t evt_id, struct gecko_cmd_packet *evt)
         init_done = 1;
 
         DI_Print("provisioned", DI_ROW_STATUS);
+        on_node_initialized(&evt->data.evt_mesh_node_initialized);
       } else {
         LOGI("node is unprovisioned\r\n");
         DI_Print("unprovisioned", DI_ROW_STATUS);
@@ -443,6 +458,13 @@ void handle_gecko_event(uint32_t evt_id, struct gecko_cmd_packet *evt)
         current_delta = LEDS_GetDeltaUV();
         sprintf(tmp, "Delta UV: %6d ", current_delta);
         DI_Print(tmp, DI_ROW_DELTAUV);
+      }
+
+      if (init_done && (evt->data.evt_system_external_signal.extsignals & EXT_SIGNAL_INCREMENT)) {
+        button_press_handler(EXT_SIGNAL_INCREMENT);
+      }
+      if (init_done && (evt->data.evt_system_external_signal.extsignals & EXT_SIGNAL_DECREMENT)) {
+        button_press_handler(EXT_SIGNAL_DECREMENT);
       }
     }
     break;

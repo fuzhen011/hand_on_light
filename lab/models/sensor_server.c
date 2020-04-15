@@ -5,6 +5,8 @@
 #include "native_gecko.h"
 #include "mesh_sensor.h"
 
+#include "em_cmu.h"
+#include "util.h"
 #include "utils/si1133.h"
 
 #undef SUB_MODULE_NAME
@@ -31,6 +33,7 @@ typedef struct lc_sensors{
   count16_t people_count;
 }lc_sensors_t;
 
+extern uint16_t appkey_index;
 extern uint16_t get_primary_elem_addr(void);
 
 /* Static Variables *************************************************** */
@@ -79,6 +82,7 @@ void sensors_init(void)
 
 static void people_count_init(void)
 {
+  CMU_ClockEnable(cmuClock_GPIO, true);
   button_init();
   enable_button_interrupts();
 }
@@ -108,7 +112,7 @@ static void people_count_change(bool inc)
                                            SINGLE_TIME)->result);
 }
 
-static void send_people_count(void)
+void send_people_count(void)
 {
   uint8_t len = 0, sensor_raw[20];
 
@@ -131,12 +135,14 @@ static void send_people_count(void)
    * Note: Remember to check the return value to know whether the sending is
    * succeeded or not.
    */
-#if 0
+#if 1
   BG_AST(gecko_cmd_mesh_sensor_server_send_status(SENSOR_ELEMENT,
                                                   get_primary_elem_addr() + 1,
-                                                  0,
+                                                  appkey_index,
                                                   NO_FLAGS,
-                                                  len, sensor_data)->result);
+                                                  len,
+                                                  sensor_raw)->result);
+  LOGV("PC sent to %x\n", get_primary_elem_addr() + 1);
 #endif
 
   BG_AST(gecko_cmd_hardware_set_soft_timer(PEOPLE_COUNT_UPDATE_INTERVAL,
@@ -153,7 +159,29 @@ static void ambient_light_init(void)
                                            REPEATED)->result);
 }
 
-static void ambient_light_send(void)
+static void ambient_light_measure(bool block)
+{
+  uint8_t irq_status;
+  SI1133_measurementForce();
+
+  while (1) {
+    SI1133_getIrqStatus(&irq_status);
+    if (irq_status != 0x0f) {
+      if (block) {
+        UTIL_delay(10);
+      } else {
+        return;
+      }
+    } else {
+      break;
+    }
+  }
+
+  SI1133_getMeasurement(&sensor_states.amb_light.lux,
+                        &sensor_states.amb_light.uv);
+}
+
+void ambient_light_send(bool block)
 {
   illuminance_t lux;
   uint8_t len = 0, sensor_raw[20];
@@ -162,6 +190,7 @@ static void ambient_light_send(void)
     /* If it's not in a network yet, return */
     return;
   }
+  ambient_light_measure(block);
 
   lux = LUX_TO_STATE(sensor_states.amb_light.lux);
 
@@ -184,12 +213,14 @@ static void ambient_light_send(void)
    * Note: Remember to check the return value to know whether the sending is
    * succeeded or not.
    */
-#if 0
+#if 1
   BG_AST(gecko_cmd_mesh_sensor_server_send_status(SENSOR_ELEMENT,
-                                                  address,
-                                                  0,
+                                                  get_primary_elem_addr() + 1,
+                                                  appkey_index,
                                                   NO_FLAGS,
-                                                  len, sensor_data)->result);
+                                                  len,
+                                                  sensor_raw)->result);
+  /* LOGV("ALS sent\n"); */
 #endif
 }
 

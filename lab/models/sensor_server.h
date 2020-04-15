@@ -34,6 +34,10 @@ extern "C"
 #define PEOPLE_COUNT_TIMER_ID (71)
 
 void sensors_init(void);
+
+void send_people_count(void);
+void ambient_light_send(bool block);
+void button_press_handler(uint32_t which);
 #ifdef __cplusplus
 }
 #endif

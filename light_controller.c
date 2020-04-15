@@ -36,6 +36,9 @@
 #define log(...)
 #endif
 
+#undef SUB_MODULE_NAME
+#define SUB_MODULE_NAME "lctl"
+#include "lab.h"
 /***************************************************************************//**
  * @addtogroup LC
  * @{
@@ -119,8 +122,8 @@ static int lc_state_load(void)
   // Set default values if ps_load fail or size of lc_state has changed
   if (pLoad->result || (pLoad->value.len != sizeof(lc_state))) {
     memset(&lc_state, 0, sizeof(lc_state));
-    lc_state.mode = 0;
-    lc_state.occupancy_mode = 0;
+    lc_state.mode = 1;
+    lc_state.occupancy_mode = 1;
     lc_state.light_onoff = 0x00;
     return -1;
   }
@@ -187,7 +190,7 @@ void lc_onpowerup_update(uint16_t element, uint8_t onpowerup)
   switch (onpowerup) {
     case MESH_GENERIC_ON_POWER_UP_STATE_OFF:
     case MESH_GENERIC_ON_POWER_UP_STATE_ON:
-      lc_state.mode = 0;
+      lc_state.mode = 1;
       lc_state.light_onoff = 0;
       lc_state.onoff_current = MESH_GENERIC_ON_OFF_STATE_OFF;
       lc_state.onoff_target = MESH_GENERIC_ON_OFF_STATE_OFF;
@@ -218,6 +221,12 @@ void lc_onpowerup_update(uint16_t element, uint8_t onpowerup)
   lc_state_changed();
 }
 
+#ifndef SEC
+#define SEC(x)  ((x) * 1000)
+#endif
+#ifndef PERS
+#define PERS(x) (0xffff * (x) / 100)
+#endif
 /***************************************************************************//**
  * This function loads the saved light controller property state from Persistent
  * Storage and copies the data in the global variable lc_property_state.
@@ -236,23 +245,27 @@ static int lc_property_state_load(void)
   if (pLoad->result || (pLoad->value.len != sizeof(lc_property_state))) {
     memset(&lc_property_state, 0, sizeof(lc_property_state));
     lc_property_state.time_occupancy_delay = 0;
-    lc_property_state.time_fade_on = 0;
-    lc_property_state.time_run_on = 2000;
-    lc_property_state.time_fade = 0;
+    lc_property_state.time_fade_on = SEC(3);
+    lc_property_state.time_run_on = SEC(6);
+    lc_property_state.time_fade = SEC(2);
     lc_property_state.time_prolong = 500;
-    lc_property_state.time_fade_standby_auto = 0;
+    lc_property_state.time_fade_standby_auto = SEC(1);
     lc_property_state.time_fade_standby_manual = 0;
-    lc_property_state.lightness_on = 65535;
-    lc_property_state.lightness_prolong = 32767;
-    lc_property_state.lightness_standby = 2000;
-    lc_property_state.ambient_luxlevel_on = 1000;
-    lc_property_state.ambient_luxlevel_prolong = 500;
-    lc_property_state.ambient_luxlevel_standby = 20;
-    lc_property_state.regulator_kiu = 0.05;
-    lc_property_state.regulator_kid = 0;
-    lc_property_state.regulator_kpu = 0.4;
-    lc_property_state.regulator_kpd = 0.3;
-    lc_property_state.regulator_accuracy = 0xFF;
+    lc_property_state.lightness_on = PERS(0);
+    lc_property_state.lightness_prolong = PERS(0);
+    lc_property_state.lightness_standby = PERS(0);
+    /* 100% - 23000 */
+    /* 50% - 11500 */
+    /* 20% - 550 */
+    /* 10% - 150 */
+    lc_property_state.ambient_luxlevel_on = 23000;
+    lc_property_state.ambient_luxlevel_prolong = 550;
+    lc_property_state.ambient_luxlevel_standby = 150;
+    lc_property_state.regulator_kiu = 1.5;
+    lc_property_state.regulator_kid = 1.5;
+    lc_property_state.regulator_kpu = 1.0;
+    lc_property_state.regulator_kpd = 1.0;
+    lc_property_state.regulator_accuracy = 4;
     return -1;
   }
 
@@ -609,6 +622,17 @@ static void lc_property_state_update(uint16_t element)
   lc_regulator_accuracy_update(element);
 }
 
+void display_modes(void)
+{
+  LOGI("LC Server States:\n"
+       "    LC Mode - %s\n"
+       "    LC OM Mode - %s\n"
+       "    LC OnOff Mode - %s\n",
+       lc_state.mode ? "ON" : "OFF",
+       lc_state.occupancy_mode ? "ON" : "OFF",
+       lc_state.light_onoff ? "ON" : "OFF"
+       );
+}
 /*******************************************************************************
  * LC initialization.
  * This should be called at each boot if provisioning is already done.
@@ -631,9 +655,9 @@ uint16_t lc_init(uint16_t element)
 
   memset(&lc_state, 0, sizeof(lc_state));
   if (lc_state_load() != 0) {
-    log("lc_state_load() failed, using defaults\r\n");
+    LOGW("lc_state_load() failed, using defaults\r\n");
   }
-
+  display_modes();
   memset(&lc_property_state, 0, sizeof(lc_property_state));
   if (lc_property_state_load() != 0) {
     log("lc_property_state_load() failed, using defaults\r\n");
@@ -660,8 +684,8 @@ uint16_t lc_init(uint16_t element)
 static void handle_lc_server_mode_updated_event(
   struct gecko_msg_mesh_lc_server_mode_updated_evt_t *pEvt)
 {
-  log("evt:gecko_evt_mesh_lc_server_mode_updated_id, mode=%u\r\n",
-      pEvt->mode_value);
+  LOGD("evt:gecko_evt_mesh_lc_server_mode_updated_id, mode=%u\r\n",
+       pEvt->mode_value);
   lc_state.mode = pEvt->mode_value;
   lc_state_changed();
 }
@@ -674,8 +698,8 @@ static void handle_lc_server_mode_updated_event(
 static void handle_lc_server_om_updated_event(
   struct gecko_msg_mesh_lc_server_om_updated_evt_t *pEvt)
 {
-  log("evt:gecko_evt_mesh_lc_server_om_updated_id, om=%u\r\n",
-      pEvt->om_value);
+  LOGD("evt:gecko_evt_mesh_lc_server_om_updated_id, om=%u\r\n",
+       pEvt->om_value);
   lc_state.occupancy_mode = pEvt->om_value;
   lc_state_changed();
 }
@@ -688,9 +712,9 @@ static void handle_lc_server_om_updated_event(
 static void handle_lc_server_light_onoff_updated_event(
   struct gecko_msg_mesh_lc_server_light_onoff_updated_evt_t *pEvt)
 {
-  log("evt:gecko_evt_mesh_lc_server_light_onoff_updated_id, lc_onoff=%u, transtime=%lu\r\n",
-      pEvt->onoff_state,
-      pEvt->onoff_trans_time);
+  LOGD("evt:gecko_evt_mesh_lc_server_light_onoff_updated_id, lc_onoff=%u, transtime=%lu\r\n",
+       pEvt->onoff_state,
+       pEvt->onoff_trans_time);
   lc_state.light_onoff = pEvt->onoff_state;
   lc_state_changed();
 }
@@ -703,8 +727,8 @@ static void handle_lc_server_light_onoff_updated_event(
 static void handle_lc_server_occupancy_updated_event(
   struct gecko_msg_mesh_lc_server_occupancy_updated_evt_t *pEvt)
 {
-  log("evt:gecko_evt_mesh_lc_server_occupancy_updated_id, occupancy=%u\r\n",
-      pEvt->occupancy_value);
+  LOGD("evt:gecko_evt_mesh_lc_server_occupancy_updated_id, occupancy=%u\r\n",
+       pEvt->occupancy_value);
 }
 
 /***************************************************************************//**
@@ -727,8 +751,8 @@ static void handle_lc_server_ambient_lux_level_updated_event(
 static void handle_lc_server_linear_output_updated_event(
   struct gecko_msg_mesh_lc_server_linear_output_updated_evt_t *pEvt)
 {
-  log("evt:gecko_evt_mesh_lc_server_linear_output_updated_id, linear_output=%u\r\n",
-      pEvt->linear_output_value);
+  LOGD("evt:gecko_evt_mesh_lc_server_linear_output_updated_id, linear_output=%u\r\n",
+       pEvt->linear_output_value);
   // Convert from linear to actual lightness value
   uint32_t lightness = (uint32_t)sqrt(65535 * (uint32_t)(pEvt->linear_output_value));
   // Update LED
@@ -978,16 +1002,19 @@ void handle_lc_server_events(struct gecko_cmd_packet *pEvt)
     case gecko_evt_mesh_lc_server_mode_updated_id:
       handle_lc_server_mode_updated_event(
         &(pEvt->data.evt_mesh_lc_server_mode_updated));
+      display_modes();
       break;
 
     case gecko_evt_mesh_lc_server_om_updated_id:
       handle_lc_server_om_updated_event(
         &(pEvt->data.evt_mesh_lc_server_om_updated));
+      display_modes();
       break;
 
     case gecko_evt_mesh_lc_server_light_onoff_updated_id:
       handle_lc_server_light_onoff_updated_event(
         &(pEvt->data.evt_mesh_lc_server_light_onoff_updated));
+      display_modes();
       break;
 
     case gecko_evt_mesh_lc_server_occupancy_updated_id:
