@@ -299,6 +299,7 @@ void handle_gecko_event(uint32_t evt_id, struct gecko_cmd_packet *evt)
 
     case gecko_evt_mesh_node_provisioning_started_id:
       LOGD("Started provisioning\r\n");
+      _my_address = evt->data.evt_mesh_node_provisioned.address;
       DI_Print("provisioning...", DI_ROW_STATUS);
       // start timer for blinking LEDs to indicate which node is being provisioned
       gecko_cmd_hardware_set_soft_timer(32768 / 4, TIMER_ID_PROVISIONING, 0);

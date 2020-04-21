@@ -69,7 +69,7 @@ bool mesh_bgapi_listener(struct gecko_cmd_packet *evt);
 #define MAX_CONNECTIONS 2
 
 /// Heap for Bluetooth stack
-uint8_t bluetooth_stack_heap[DEFAULT_BLUETOOTH_HEAP(MAX_CONNECTIONS) + BTMESH_HEAP_SIZE + 1760];
+uint8_t bluetooth_stack_heap[DEFAULT_BLUETOOTH_HEAP(MAX_CONNECTIONS) + BTMESH_HEAP_SIZE + 1760 * 2];
 
 /// Bluetooth advertisement set configuration
 ///

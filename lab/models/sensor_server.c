@@ -116,6 +116,9 @@ void send_people_count(void)
 {
   uint8_t len = 0, sensor_raw[20];
 
+  if (get_primary_elem_addr() == 0) {
+    return;
+  }
   len += mesh_sensor_data_to_buf(PEOPLE_COUNT,
                                  &sensor_raw[len],
                                  (uint8_t*)&sensor_states.people_count);
