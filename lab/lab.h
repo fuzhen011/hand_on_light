@@ -9,7 +9,7 @@ extern "C"
 #include "logging/log.h"
 #include "models/sensor_server.h"
 
-/* #define AMBIENT_LUX_CTL */
+#define AMBIENT_LUX_CTL
 
 #define SENSOR_SERVER_MODEL_ELEMENT_INDEX 0
 
