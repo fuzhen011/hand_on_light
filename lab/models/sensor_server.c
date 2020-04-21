@@ -155,10 +155,11 @@ void send_people_count(void)
 static void ambient_light_init(void)
 {
   SI1133_init();
-
+#ifdef AMBIENT_LUX_CTL
   BG_AST(gecko_cmd_hardware_set_soft_timer(AMBIENT_LIGHT_READ_INTERVAL,
                                            AMBIENT_LIGHT_SENSOR_TIMER_ID,
                                            REPEATED)->result);
+#endif
 }
 
 static void ambient_light_measure(bool block)

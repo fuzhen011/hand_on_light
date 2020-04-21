@@ -39,6 +39,7 @@
 #undef SUB_MODULE_NAME
 #define SUB_MODULE_NAME "lctl"
 #include "lab.h"
+
 /***************************************************************************//**
  * @addtogroup LC
  * @{
@@ -235,6 +236,7 @@ void lc_onpowerup_update(uint16_t element, uint8_t onpowerup)
  *
  * @return 0 if loading succeeds. -1 if loading fails.
  ******************************************************************************/
+
 static int lc_property_state_load(void)
 {
   struct gecko_msg_flash_ps_load_rsp_t* pLoad;
@@ -245,26 +247,22 @@ static int lc_property_state_load(void)
   if (pLoad->result || (pLoad->value.len != sizeof(lc_property_state))) {
     memset(&lc_property_state, 0, sizeof(lc_property_state));
     lc_property_state.time_occupancy_delay = 0;
-    lc_property_state.time_fade_on = SEC(3);
-    lc_property_state.time_run_on = SEC(6);
+    lc_property_state.time_fade_on = SEC(2);
+    lc_property_state.time_run_on = SEC(8);
     lc_property_state.time_fade = SEC(2);
-    lc_property_state.time_prolong = 500;
-    lc_property_state.time_fade_standby_auto = SEC(1);
+    lc_property_state.time_prolong = SEC(4);
+    lc_property_state.time_fade_standby_auto = SEC(2);
     lc_property_state.time_fade_standby_manual = 0;
-    lc_property_state.lightness_on = PERS(0);
-    lc_property_state.lightness_prolong = PERS(0);
-    lc_property_state.lightness_standby = PERS(0);
-    /* 100% - 23000 */
-    /* 50% - 11500 */
-    /* 20% - 550 */
-    /* 10% - 150 */
+    lc_property_state.lightness_on = PERS(100);
+    lc_property_state.lightness_prolong = PERS(30);
+    lc_property_state.lightness_standby = PERS(5);
     lc_property_state.ambient_luxlevel_on = 23000;
     lc_property_state.ambient_luxlevel_prolong = 550;
     lc_property_state.ambient_luxlevel_standby = 150;
-    lc_property_state.regulator_kiu = 1.5;
-    lc_property_state.regulator_kid = 1.5;
-    lc_property_state.regulator_kpu = 1.0;
-    lc_property_state.regulator_kpd = 1.0;
+    lc_property_state.regulator_kiu = 6.0;
+    lc_property_state.regulator_kid = 60.0;
+    lc_property_state.regulator_kpu = 40.0;
+    lc_property_state.regulator_kpd = 40.0;
     lc_property_state.regulator_accuracy = 4;
     return -1;
   }

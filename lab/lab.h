@@ -9,6 +9,8 @@ extern "C"
 #include "logging/log.h"
 #include "models/sensor_server.h"
 
+/* #define AMBIENT_LUX_CTL */
+
 #define SENSOR_SERVER_MODEL_ELEMENT_INDEX 0
 
 void self_config(const struct gecko_msg_mesh_node_initialized_evt_t *evt);
