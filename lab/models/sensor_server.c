@@ -116,37 +116,36 @@ void send_people_count(void)
 {
   uint8_t len = 0, sensor_raw[20];
 
-  if (get_primary_elem_addr() == 0) {
-    return;
-  }
-  len += mesh_sensor_data_to_buf(PEOPLE_COUNT,
-                                 &sensor_raw[len],
-                                 (uint8_t*)&sensor_states.people_count);
+  if (get_primary_elem_addr() != 0) {
+    len += mesh_sensor_data_to_buf(PEOPLE_COUNT,
+                                   &sensor_raw[len],
+                                   (uint8_t*)&sensor_states.people_count);
 
-  /*
-   * TODO
-   *
-   * Send the sensor status, which is already filled into sensor_raw buffer, to
-   * the LC server.
-   *
-   * You could either:
-   *   - Publish the value to the group address that the LC server subscribes
-   *   from.
-   *   - Send unicast message to the address of the element where the LC server
-   *   resides.
-   *
-   * Note: Remember to check the return value to know whether the sending is
-   * succeeded or not.
-   */
+    /*
+     * TODO
+     *
+     * Send the sensor status, which is already filled into sensor_raw buffer, to
+     * the LC server.
+     *
+     * You could either:
+     *   - Publish the value to the group address that the LC server subscribes
+     *   from.
+     *   - Send unicast message to the address of the element where the LC server
+     *   resides.
+     *
+     * Note: Remember to check the return value to know whether the sending is
+     * succeeded or not.
+     */
 #if 1
-  BG_AST(gecko_cmd_mesh_sensor_server_send_status(SENSOR_ELEMENT,
-                                                  get_primary_elem_addr() + 1,
-                                                  appkey_index,
-                                                  NO_FLAGS,
-                                                  len,
-                                                  sensor_raw)->result);
-  LOGV("PC sent to %x\n", get_primary_elem_addr() + 1);
+    BG_AST(gecko_cmd_mesh_sensor_server_send_status(SENSOR_ELEMENT,
+                                                    get_primary_elem_addr() + 1,
+                                                    appkey_index,
+                                                    NO_FLAGS,
+                                                    len,
+                                                    sensor_raw)->result);
+    LOGV("PC sent to %x\n", get_primary_elem_addr() + 1);
 #endif
+  }
 
   BG_AST(gecko_cmd_hardware_set_soft_timer(PEOPLE_COUNT_UPDATE_INTERVAL,
                                            PEOPLE_COUNT_TIMER_ID,
@@ -189,8 +188,8 @@ void ambient_light_send(bool block)
   illuminance_t lux;
   uint8_t len = 0, sensor_raw[20];
 
-  if (get_primary_elem_addr() == 0) {
-    /* If it's not in a network yet, return */
+  if (get_primary_elem_addr() == 0 || appkey_index == 0xFFFF) {
+    /* If it's not in a network or not bound to an appkey yet, return */
     return;
   }
   ambient_light_measure(block);

@@ -751,8 +751,8 @@ static void handle_lc_server_ambient_lux_level_updated_event(
 static void handle_lc_server_linear_output_updated_event(
   struct gecko_msg_mesh_lc_server_linear_output_updated_evt_t *pEvt)
 {
-  LOGD("evt:gecko_evt_mesh_lc_server_linear_output_updated_id, linear_output=%u\r\n",
-       pEvt->linear_output_value);
+  log("evt:gecko_evt_mesh_lc_server_linear_output_updated_id, linear_output=%u\r\n",
+      pEvt->linear_output_value);
   // Convert from linear to actual lightness value
   uint32_t lightness = (uint32_t)sqrt(65535 * (uint32_t)(pEvt->linear_output_value));
   // Update LED

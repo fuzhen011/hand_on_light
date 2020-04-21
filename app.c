@@ -299,7 +299,6 @@ void handle_gecko_event(uint32_t evt_id, struct gecko_cmd_packet *evt)
 
     case gecko_evt_mesh_node_provisioning_started_id:
       LOGD("Started provisioning\r\n");
-      _my_address = evt->data.evt_mesh_node_provisioned.address;
       DI_Print("provisioning...", DI_ROW_STATUS);
       // start timer for blinking LEDs to indicate which node is being provisioned
       gecko_cmd_hardware_set_soft_timer(32768 / 4, TIMER_ID_PROVISIONING, 0);
@@ -309,6 +308,7 @@ void handle_gecko_event(uint32_t evt_id, struct gecko_cmd_packet *evt)
       lightbulb_state_init();
       init_done = 1;
       LOGI("node provisioned, got address=%x\r\n", evt->data.evt_mesh_node_provisioned.address);
+      _my_address = evt->data.evt_mesh_node_provisioned.address;
       // stop LED blinking when provisioning complete
       gecko_cmd_hardware_set_soft_timer(0, TIMER_ID_PROVISIONING, 0);
       DI_Print("provisioned", DI_ROW_STATUS);
@@ -447,6 +447,7 @@ void handle_gecko_event(uint32_t evt_id, struct gecko_cmd_packet *evt)
         current_level = LEDS_GetLevel();
         sprintf(tmp, "Lightness: %5u%%", (current_level * 100 + 99) / 65535);
         DI_Print(tmp, DI_ROW_LIGHTNESS);
+        LOGI("%s\n", tmp);
       }
 
       if (init_done && (evt->data.evt_system_external_signal.extsignals & EXT_SIGNAL_LED_TEMPERATURE_CHANGED)) {

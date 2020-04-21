@@ -40,7 +40,7 @@
 #endif
 
 #undef SUB_MODULE_NAME
-#define SUB_MODULE_NAME "lctl"
+#define SUB_MODULE_NAME "lightbulb"
 #include "lab.h"
 /***********************************************************************************************//**
  * @addtogroup Lightbulb
@@ -979,7 +979,7 @@ static void lightness_request(uint16_t model_id,
   }
 
   LOGD("lightness_request: level=%u, transition=%lu, delay=%u\r\n",
-      actual_request, transition_ms, delay_ms);
+       actual_request, transition_ms, delay_ms);
 
   if (lightbulb_state.lightness_current == actual_request) {
     LOGD("Request for current state received; no op\r\n");
@@ -1057,16 +1057,16 @@ static void lightness_change(uint16_t model_id,
 {
   if (current->kind != mesh_lighting_state_lightness_actual) {
     // if kind is not 'actual' then just report the change here, no change to light state
-    LOGD("lightness change, kind %u, value %u\r\n", current->kind, current->lightness.level);
+    log("lightness change, kind %u, value %u\r\n", current->kind, current->lightness.level);
     return;
   }
 
   if (lightbulb_state.lightness_current != current->lightness.level) {
-    LOGD("lightness_change: from %u to %u\r\n", lightbulb_state.lightness_current, current->lightness.level);
+    log("lightness_change: from %u to %u\r\n", lightbulb_state.lightness_current, current->lightness.level);
     lightbulb_state.lightness_current = current->lightness.level;
     lightbulb_state_changed();
   } else {
-    LOGD("lightness update -same value (%d)\r\n", lightbulb_state.lightness_current);
+    log("lightness update -same value (%d)\r\n", lightbulb_state.lightness_current);
   }
 }
 
