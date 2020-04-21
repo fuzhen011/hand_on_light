@@ -1002,6 +1002,13 @@ void handle_lc_server_events(struct gecko_cmd_packet *pEvt)
     case gecko_evt_mesh_lc_server_mode_updated_id:
       handle_lc_server_mode_updated_event(
         &(pEvt->data.evt_mesh_lc_server_mode_updated));
+      if (!pEvt->data.evt_mesh_lc_server_mode_updated.mode_value) {
+        lc_state.mode = 1;
+        gecko_cmd_mesh_lc_server_update_mode(
+          pEvt->data.evt_mesh_lc_server_mode_updated.elem_index,
+          lc_state.mode);
+        lc_state_changed();
+      }
       display_modes();
       break;
 
