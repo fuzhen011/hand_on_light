@@ -10,7 +10,7 @@
 #include "utils/si1133.h"
 
 #undef SUB_MODULE_NAME
-#define SUB_MODULE_NAME "LC_Client"
+#define SUB_MODULE_NAME "LC_Sensors"
 #include "logging/log.h"
 
 /* Defines  *********************************************************** */
@@ -38,6 +38,7 @@ extern uint16_t appkey_index;
 extern uint16_t get_primary_elem_addr(void);
 
 /* Static Variables *************************************************** */
+bool ambient_sensor_enabled = false;
 static lc_sensors_t sensor_states = { 0 };
 
 static const sensor_descriptor_t sensor_des[] = {
@@ -86,6 +87,11 @@ static void people_count_init(void)
   CMU_ClockEnable(cmuClock_GPIO, true);
   button_init();
   enable_button_interrupts();
+}
+
+void sensors_on_factory_reset(void)
+{
+  ambient_sensor_enabled = 0;
 }
 
 static void people_count_change(bool inc)
@@ -156,11 +162,9 @@ void send_people_count(void)
 static void ambient_light_init(void)
 {
   SI1133_init();
-#ifdef AMBIENT_LUX_CTL
   BG_AST(gecko_cmd_hardware_set_soft_timer(AMBIENT_LIGHT_READ_INTERVAL,
                                            AMBIENT_LIGHT_SENSOR_TIMER_ID,
                                            REPEATED)->result);
-#endif
 }
 
 static void ambient_light_measure(bool block)
@@ -185,10 +189,23 @@ static void ambient_light_measure(bool block)
                         &sensor_states.amb_light.uv);
 }
 
+void enable_ambient_sensor(void)
+{
+  if (ambient_sensor_enabled) {
+    return;
+  }
+  ambient_sensor_enabled = 1;
+  ambient_light_send(1);
+}
+
 void ambient_light_send(bool block)
 {
   illuminance_t lux;
   uint8_t len = 0, sensor_raw[20];
+
+  if (!ambient_sensor_enabled) {
+    return;
+  }
 
   if (get_primary_elem_addr() == 0 || appkey_index == 0xFFFF) {
     /* If it's not in a network or not bound to an appkey yet, return */

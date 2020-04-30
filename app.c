@@ -323,7 +323,7 @@ void handle_gecko_event(uint32_t evt_id, struct gecko_cmd_packet *evt)
 
     case gecko_evt_mesh_node_key_added_id:
       LOGI("got new %s key with index %x\r\n", evt->data.evt_mesh_node_key_added.type == 0 ? "network" : "application",
-          evt->data.evt_mesh_node_key_added.index);
+           evt->data.evt_mesh_node_key_added.index);
       on_appkey_added(&evt->data.evt_mesh_node_key_added);
       break;
 
@@ -378,6 +378,8 @@ void handle_gecko_event(uint32_t evt_id, struct gecko_cmd_packet *evt)
     case gecko_evt_mesh_node_reset_id:
       LOGW("evt gecko_evt_mesh_node_reset_id\r\n");
       initiate_factory_reset();
+      _my_address = 0;
+      sensors_on_factory_reset();
       break;
 
     case gecko_evt_mesh_friend_friendship_established_id:

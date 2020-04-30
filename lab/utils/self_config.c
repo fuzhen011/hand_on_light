@@ -148,7 +148,5 @@ static void lc_sensors_start(void)
 
   LOGI("LC Sensors Started\n");
   send_people_count();
-#ifdef AMBIENT_LUX_CTL
   ambient_light_send(1);
-#endif
 }

@@ -252,31 +252,30 @@ static int lc_property_state_load(void)
     lc_property_state.time_prolong = SEC(4);
     lc_property_state.time_fade_standby_auto = SEC(2);
     lc_property_state.time_fade_standby_manual = 0;
-#ifdef AMBIENT_LUX_CTL
-    lc_property_state.lightness_on = PERS(0);
-    lc_property_state.lightness_prolong = PERS(0);
-    lc_property_state.lightness_standby = PERS(0);
-    lc_property_state.ambient_luxlevel_on = 23000;
-    lc_property_state.ambient_luxlevel_prolong = 550;
-    lc_property_state.ambient_luxlevel_standby = 150;
-#else
     lc_property_state.lightness_on = PERS(100);
     lc_property_state.lightness_prolong = PERS(30);
     lc_property_state.lightness_standby = PERS(5);
-    lc_property_state.ambient_luxlevel_on = 23000;
-    lc_property_state.ambient_luxlevel_prolong = 550;
-    lc_property_state.ambient_luxlevel_standby = 150;
-#endif
+    /* 23000 550 150 */
+    lc_property_state.ambient_luxlevel_on = 0;
+    lc_property_state.ambient_luxlevel_prolong = 0;
+    lc_property_state.ambient_luxlevel_standby = 0;
     lc_property_state.regulator_kiu = 150.0;
     lc_property_state.regulator_kid = 150.0;
     lc_property_state.regulator_kpu = 70.0;
     lc_property_state.regulator_kpd = 70.0;
     lc_property_state.regulator_accuracy = 4;
+    LOGW("Ambient Sensor Loopback Disabled.\n");
     return -1;
   }
 
   memcpy(&lc_property_state, pLoad->value.data, pLoad->value.len);
 
+  if (lc_property_state.ambient_luxlevel_on) {
+    LOGW("Ambient Sensor Loopback Enabled.\n");
+    enable_ambient_sensor();
+  } else {
+    LOGW("Ambient Sensor Loopback Disabled.\n");
+  }
   return 0;
 }
 
@@ -764,7 +763,7 @@ static void handle_lc_server_linear_output_updated_event(
 #if 0
   log("evt:gecko_evt_mesh_lc_server_linear_output_updated_id, linear_output=%u\r\n",
       pEvt->linear_output_value);
-#else 
+#else
   /* LOGD("LC Server Linear Output - %u\n", pEvt->linear_output_value); */
 #endif
   // Convert from linear to actual lightness value
@@ -914,6 +913,10 @@ static void handle_lc_setup_server_set_property(
       log("Light Control Ambient LuxLevel On = %u.%02ulux\r\n",
           lc_property_state.ambient_luxlevel_on / 100,
           lc_property_state.ambient_luxlevel_on % 100);
+      if (lc_property_state.ambient_luxlevel_on) {
+        LOGW("Ambient Sensor Loopback Enabled.\n");
+        enable_ambient_sensor();
+      }
       break;
 
     case LIGHT_CONTROL_AMBIENT_LUXLEVEL_PROLONG:

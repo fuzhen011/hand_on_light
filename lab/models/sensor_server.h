@@ -35,6 +35,8 @@ extern "C"
 
 void sensors_init(void);
 
+void enable_ambient_sensor(void);
+void sensors_on_factory_reset(void);
 void send_people_count(void);
 void ambient_light_send(bool block);
 void button_press_handler(uint32_t which);
