@@ -123,12 +123,12 @@ static void set_device_name(bd_addr *pAddr)
   // create unique device name using the last two bytes of the Bluetooth address
   sprintf(name, "light node %02x:%02x", pAddr->addr[1], pAddr->addr[0]);
 
-  log("Device name: '%s'\r\n", name);
+  LOGV("Device name: '%s'\r\n", name);
 
   // write device name to the GATT database
   res = gecko_cmd_gatt_server_write_attribute_value(gattdb_device_name, 0, strlen(name), (uint8_t *)name)->result;
   if (res) {
-    log("gecko_cmd_gatt_server_write_attribute_value() failed, code %x\r\n", res);
+    LOGE("gecko_cmd_gatt_server_write_attribute_value() failed, code %x\r\n", res);
   }
 
   // show device name on the LCD
@@ -322,13 +322,13 @@ void handle_gecko_event(uint32_t evt_id, struct gecko_cmd_packet *evt)
       break;
 
     case gecko_evt_mesh_node_key_added_id:
-      log("got new %s key with index %x\r\n", evt->data.evt_mesh_node_key_added.type == 0 ? "network" : "application",
+      LOGI("got new %s key with index %x\r\n", evt->data.evt_mesh_node_key_added.type == 0 ? "network" : "application",
           evt->data.evt_mesh_node_key_added.index);
       on_appkey_added(&evt->data.evt_mesh_node_key_added);
       break;
 
     case gecko_evt_mesh_node_model_config_changed_id:
-      log("model config changed\r\n");
+      LOGV("model config changed\r\n");
       break;
 
     case gecko_evt_mesh_generic_server_client_request_id:

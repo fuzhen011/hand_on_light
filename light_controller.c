@@ -151,7 +151,7 @@ static int lc_state_store(void)
                                   (const uint8*)&lc_state);
 
   if (pSave->result) {
-    log("lc_state_store(): PS save failed, code %x\r\n", pSave->result);
+    LOGE("lc_state_store(): PS save failed, code %x\r\n", pSave->result);
     return(-1);
   }
 
@@ -297,7 +297,7 @@ static int lc_property_state_store(void)
                                   (const uint8*)&lc_property_state);
 
   if (pSave->result) {
-    log("lc_property_state_store(): PS save failed, code %x\r\n", pSave->result);
+    LOGE("lc_property_state_store(): PS save failed, code %x\r\n", pSave->result);
     return(-1);
   }
 
@@ -335,7 +335,7 @@ static void update_property(uint16_t element, const uint8_t *pProperty_data)
                                                    pProperty_data[2],
                                                    &pProperty_data[3])->result;
   if (result) {
-    log("lc_setup_server_update_property failed, error=%u\r\n", result);
+    LOGE("lc_setup_server_update_property failed, error=%u\r\n", result);
   }
 }
 
@@ -654,7 +654,7 @@ uint16_t lc_init(uint16_t element)
   // Initialize lc server models
   uint16_t result = gecko_cmd_mesh_lc_server_init(element)->result;
   if (result) {
-    log("mesh_lc_server_init failed, code 0x%x\r\n", result);
+    LOGE("mesh_lc_server_init failed, code 0x%x\r\n", result);
   }
 
   lc_element = element;
@@ -666,14 +666,14 @@ uint16_t lc_init(uint16_t element)
   display_modes();
   memset(&lc_property_state, 0, sizeof(lc_property_state));
   if (lc_property_state_load() != 0) {
-    log("lc_property_state_load() failed, using defaults\r\n");
+    LOGE("lc_property_state_load() failed, using defaults\r\n");
   }
 
   // Set the regulator interval to 100 milliseconds. If you want to use shorter
   // intervals, you should disable some logs in order not to affect performance.
   result = gecko_cmd_mesh_lc_server_set_regulator_interval(element, 100)->result;
   if (result) {
-    log("mesh_lc_server_set_regulator_interval failed, code 0x%x\r\n", result);
+    LOGE("mesh_lc_server_set_regulator_interval failed, code 0x%x\r\n", result);
   }
 
   lc_property_state_update(element);
@@ -745,8 +745,12 @@ static void handle_lc_server_occupancy_updated_event(
 static void handle_lc_server_ambient_lux_level_updated_event(
   struct gecko_msg_mesh_lc_server_ambient_lux_level_updated_evt_t *pEvt)
 {
+#if 0
   log("evt:gecko_evt_mesh_lc_server_ambient_lux_level_updated_id, lux_level=%lu\r\n",
       pEvt->ambient_lux_level_value);
+#else
+  /* LOGD("Ambient Lux Level - %lulux\n", pEvt->ambient_lux_level_value); */
+#endif
 }
 
 /***************************************************************************//**
@@ -757,8 +761,12 @@ static void handle_lc_server_ambient_lux_level_updated_event(
 static void handle_lc_server_linear_output_updated_event(
   struct gecko_msg_mesh_lc_server_linear_output_updated_evt_t *pEvt)
 {
+#if 0
   log("evt:gecko_evt_mesh_lc_server_linear_output_updated_id, linear_output=%u\r\n",
       pEvt->linear_output_value);
+#else 
+  /* LOGD("LC Server Linear Output - %u\n", pEvt->linear_output_value); */
+#endif
   // Convert from linear to actual lightness value
   uint32_t lightness = (uint32_t)sqrt(65535 * (uint32_t)(pEvt->linear_output_value));
   // Update LED

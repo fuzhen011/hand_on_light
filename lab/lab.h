@@ -10,7 +10,7 @@ extern "C"
 #include "models/sensor_server.h"
 
 /*
- * TODO:
+ * TO BE FINISHED - 3:
  *
  * Check how the difference in regulating the lightness between uncommenting and
  * commenting the below line.

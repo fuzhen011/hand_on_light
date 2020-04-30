@@ -22,6 +22,7 @@
 #define SENSOR_ELEMENT     0 ///< Sensor model located in primary element
 #define NO_FLAGS           0 ///< No flags used for message
 #define VALUE_IS_NOT_KNOWN  (0xFFFF) ///< People count value is not known
+
 /* Global Variables *************************************************** */
 typedef struct ambient_light{
   float lux;
@@ -122,7 +123,7 @@ void send_people_count(void)
                                    (uint8_t*)&sensor_states.people_count);
 
     /*
-     * TODO
+     * TO BE FINISHED - 1:
      *
      * Send the sensor status, which is already filled into sensor_raw buffer, to
      * the LC server.
@@ -202,7 +203,7 @@ void ambient_light_send(bool block)
                                  (uint8_t*)&lux);
 
   /*
-   * TODO
+   * TO BE FINISHED - 2:
    *
    * Send the sensor status, which is already filled into sensor_raw buffer, to
    * the LC server.
