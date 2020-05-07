@@ -24,6 +24,9 @@ extern "C"
 #define TICKS_PER_MS(x) ((x) * BSP_CLK_LFXO_FREQ / 1000)
 #endif
 
+/*
+ * Ambient and people count sensor messages loopback interval
+ */
 #define AMBIENT_LIGHT_READ_INTERVAL TICKS_PER_MS(300)
 #define PEOPLE_COUNT_UPDATE_INTERVAL  TICKS_PER_SECOND(3)
 
@@ -34,7 +37,6 @@ extern "C"
 #define PEOPLE_COUNT_TIMER_ID (71)
 
 void sensors_init(void);
-
 void enable_ambient_sensor(void);
 void sensors_on_factory_reset(void);
 void send_people_count(void);

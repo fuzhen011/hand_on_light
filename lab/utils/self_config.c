@@ -1,12 +1,6 @@
-/*************************************************************************
-    > File Name: self_config.c
-    > Author: Kevin
-    > Created Time: 2020-04-10
-    > Description:
- ************************************************************************/
-
 /* Includes *********************************************************** */
 #include "native_gecko.h"
+
 #undef SUB_MODULE_NAME
 #define SUB_MODULE_NAME "self_config"
 #include "lab.h"
@@ -15,7 +9,6 @@
 
 /* Defines  *********************************************************** */
 #define PRIMARY_SUBNET  0
-
 #define SELF_CFG_ADDR 0x0005
 
 #define TYPE_NETKEY 0
