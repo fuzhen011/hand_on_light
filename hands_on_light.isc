@@ -1,9 +1,9 @@
 #ISD afv6
-# Simplicity Studio version: 5.17.0.202003101220-27
+# Simplicity Studio version: 5.18.4.202004141446-34
 
 # Application configuration
 stackId: com.silabs.sdk.stack.btmesh
-stackRoot: /Applications/Simplicity Studio.app/Contents/Eclipse/developer/sdks/blemesh/v1.6
+stackRoot: /home/zhfu/work/SimplicityStudio_v4/developer/sdks/blemesh/v1.6
 appId: btmesh
 frameworkRoot: app/bluetooth/appbuilder/fwk-mesh
 architecture: efr32~family[M]~series[1]~device_configuration[2]~performance[P]~radio[332]~flash[1024K]~temp[G]~package[L]~pins[125]~!module+BRD4166A+gcc
@@ -118,7 +118,7 @@ appPlugin: slot-manager=false
       \{
         "Name": "Primary Element",
         "Loc": "0x0000",
-        "NumS": "15",
+        "NumS": "13",
         "NumV": "0",
         "SIG Models": [
           "0x0000",
@@ -146,11 +146,7 @@ appPlugin: slot-manager=false
           "0x1203",
           "Scene Server",
           "0x1204",
-          "Scene Setup Server",
-          "0x1100",
-          "Sensor Server",
-          "0x1101",
-          "Sensor Setup Server"]
+          "Scene Setup Server"]
         ,
         "Vendor Models": [
           ]
@@ -178,7 +174,7 @@ appPlugin: slot-manager=false
   \},
   "Memory configuration": \{
     "MAX_ELEMENTS": "2",
-    "MAX_MODELS": "20",
+    "MAX_MODELS": "18",
     "MAX_APP_BINDS": "4",
     "MAX_SUBSCRIPTIONS": "4",
     "MAX_NETKEYS": "4",
