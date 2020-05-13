@@ -259,8 +259,8 @@ static int lc_property_state_load(void)
     lc_property_state.ambient_luxlevel_on = 0;
     lc_property_state.ambient_luxlevel_prolong = 0;
     lc_property_state.ambient_luxlevel_standby = 0;
-    lc_property_state.regulator_kiu = 150.0;
-    lc_property_state.regulator_kid = 150.0;
+    lc_property_state.regulator_kiu = 400.0;
+    lc_property_state.regulator_kid = 400.0;
     lc_property_state.regulator_kpu = 70.0;
     lc_property_state.regulator_kpd = 70.0;
     lc_property_state.regulator_accuracy = 4;
