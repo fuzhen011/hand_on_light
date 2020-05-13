@@ -158,10 +158,9 @@
 							<tool id="com.silabs.ide.si32.gcc.cdt.managedbuild.tool.gnu.c.linker.base.1494263552" name="GNU ARM C Linker" superClass="com.silabs.ide.si32.gcc.cdt.managedbuild.tool.gnu.c.linker.base">
 								<option id="gnu.c.link.option.userobjs.600711619" name="Other objects" superClass="gnu.c.link.option.userobjs" valueType="userObjs">
 									<listOptionValue builtIn="false" value="${workspace_loc:/${ProjName}/protocol/bluetooth/lib/EFR32XG12X/GCC/binapploader.o}"/>
-									<listOptionValue builtIn="false" value="/home/zhfu/work/super/protocol/bluetooth/apps/ncp_mesh/build/efr32mg12p-gcc-full-debug/libbluetooth_mesh.a"/>
+									<listOptionValue builtIn="false" value="${workspace_loc:/${ProjName}/protocol/bluetooth/lib/EFR32XG12X/GCC/libbluetooth_mesh.a}"/>
 									<listOptionValue builtIn="false" value="${workspace_loc:/${ProjName}/platform/radio/rail_lib/autogen/librail_release/librail_efr32xg12_gcc_release.a}"/>
 									<listOptionValue builtIn="false" value="${workspace_loc:/${ProjName}/platform/emdrv/nvm3/lib/libnvm3_CM4_gcc.a}"/>
-									<listOptionValue builtIn="false" value="${workspace_loc:/${ProjName}/protocol/bluetooth/lib/EFR32XG12X/GCC/libbluetooth_mesh.a}"/>
 								</option>
 								<option id="gnu.c.link.option.ldflags.1992454979" name="Linker flags" superClass="gnu.c.link.option.ldflags" value="-Wl,--undefined,sl_app_properties,--undefined,__Vectors,--undefined,__aeabi_uldivmod,--undefined,ceil,--undefined,__nvm3Base" valueType="string"/>
 								<option id="com.silabs.ide.si32.gcc.cdt.managedbuild.tool.gnu.c.linker.floatingpoint.type.1744529213" name="Floating-Point ABI" superClass="com.silabs.ide.si32.gcc.cdt.managedbuild.tool.gnu.c.linker.floatingpoint.type" value="floatingpoint.type.softfp" valueType="enumerated"/>
