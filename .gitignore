@@ -8,3 +8,4 @@ core
 .clangd
 .gdb*
 *.bak
+.DS_Store
