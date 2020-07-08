@@ -143,15 +143,6 @@ void send_people_count(void)
      * Note: Remember to check the return value to know whether the sending is
      * succeeded or not.
      */
-#if 1
-    BG_AST(gecko_cmd_mesh_sensor_server_send_status(SENSOR_ELEMENT,
-                                                    get_primary_elem_addr() + 1,
-                                                    appkey_index,
-                                                    NO_FLAGS,
-                                                    len,
-                                                    sensor_raw)->result);
-    LOGV("PC sent to %x\n", get_primary_elem_addr() + 1);
-#endif
   }
 
   BG_AST(gecko_cmd_hardware_set_soft_timer(PEOPLE_COUNT_UPDATE_INTERVAL,
@@ -234,15 +225,6 @@ void ambient_light_send(bool block)
    * Note: Remember to check the return value to know whether the sending is
    * succeeded or not.
    */
-#if 1
-  BG_AST(gecko_cmd_mesh_sensor_server_send_status(SENSOR_ELEMENT,
-                                                  get_primary_elem_addr() + 1,
-                                                  appkey_index,
-                                                  NO_FLAGS,
-                                                  len,
-                                                  sensor_raw)->result);
-  /* LOGV("ALS sent\n"); */
-#endif
 }
 
 /*******************************************************************************
