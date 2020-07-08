@@ -43,7 +43,7 @@
           "Sensor Server",
           "0x1101",
           "Sensor Setup Server",
-	  "0x1200",
+          "0x1200",
           "Time Server",
           "0x1201",
           "Time Setup Server",
