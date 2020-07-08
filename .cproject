@@ -403,7 +403,14 @@
 		<project id="hands_on_light.com.silabs.ss.framework.ide.project.core.cdt.cdtMbsProjectType.1320844565" name="SLS CDT Project" projectType="com.silabs.ss.framework.ide.project.core.cdt.cdtMbsProjectType"/>
 	</storageModule>
 	<storageModule moduleId="org.eclipse.cdt.core.LanguageSettingsProviders"/>
-	<storageModule moduleId="refreshScope"/>
+	<storageModule moduleId="refreshScope" versionNumber="2">
+		<configuration configurationName="GNU ARM v7.2.1 - Default - EFR32MG12P332F1024GL125">
+			<resource resourceType="PROJECT" workspacePath="/hands_on_light"/>
+		</configuration>
+		<configuration configurationName="GNU ARM v7.2.1 - Default">
+			<resource resourceType="PROJECT" workspacePath="/hands_on_light"/>
+		</configuration>
+	</storageModule>
 	<storageModule moduleId="scannerConfiguration">
 		<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId=""/>
 		<scannerConfigBuildInfo instanceId="com.silabs.ss.framework.project.toolchain.core.default#com.silabs.ss.tool.ide.arm.toolchain.gnu.cdt:7.2.1.20170904 - EFR32MG12P332F1024GL125;com.silabs.ss.framework.project.toolchain.core.default#com.silabs.ss.tool.ide.arm.toolchain.gnu.cdt:7.2.1.20170904 - EFR32MG12P332F1024GL125.;com.silabs.ide.si32.gcc.cdt.managedbuild.tool.gnu.c.compiler.base.1608656875;com.silabs.ide.si32.gcc.cdt.managedbuild.tool.gnu.c.compiler.input.1905749953">
