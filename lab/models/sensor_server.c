@@ -138,7 +138,7 @@ void send_people_count(void)
      *   - Publish the value to the group address that the LC server subscribes
      *   from.
      *   - Send unicast message to the address of the element where the LC server
-     *   resides.
+     *   resides. This is the preferred way in this lab.
      *
      * Note: Remember to check the return value to know whether the sending is
      * succeeded or not.
@@ -229,7 +229,7 @@ void ambient_light_send(bool block)
    *   - Publish the value to the group address that the LC server subscribes
    *   from.
    *   - Send unicast message to the address of the element where the LC server
-   *   resides.
+   *   resides. This is the preferred way in this lab.
    *
    * Note: Remember to check the return value to know whether the sending is
    * succeeded or not.
