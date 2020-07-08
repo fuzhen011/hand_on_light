@@ -37,6 +37,11 @@
 #include "mesh_lib.h"
 #include "mesh_serdeser.h"
 
+/* Enough room for Property ID (2 bytes), access flags (1 byte), and
+   longest currently defined property characteristic (36 bytes) */
+#define LONGEST_STATE 39
+#define LONGEST_REQUEST 39
+
 uint32_t mesh_lib_transition_time_to_ms(uint8_t t)
 {
   uint32_t res_ms[4] = { 100, 1000, 10000, 600000 };
@@ -289,7 +294,7 @@ mesh_lib_generic_server_response(uint16_t model_id,
                                  uint32_t remaining_ms,
                                  uint8_t response_flags)
 {
-  uint8_t buf[12];
+  uint8_t buf[LONGEST_STATE];
   size_t len;
 
   if (mesh_lib_serialize_state(current, target, buf, sizeof(buf), &len) != 0) {
@@ -313,7 +318,7 @@ mesh_lib_generic_server_update(uint16_t model_id,
                                const struct mesh_generic_state *target,
                                uint32_t remaining_ms)
 {
-  uint8_t buf[12];
+  uint8_t buf[LONGEST_STATE];
   size_t len;
 
   if (mesh_lib_serialize_state(current, target, buf, sizeof(buf), &len) != 0) {
@@ -360,7 +365,7 @@ errorcode_t mesh_lib_generic_client_set(uint16_t model_id,
                                         uint16_t delay_ms,
                                         uint8_t flags)
 {
-  uint8_t buf[10];
+  uint8_t buf[LONGEST_REQUEST];
   size_t len;
 
   if (mesh_lib_serialize_request(request, buf, sizeof(buf), &len) != 0) {
@@ -388,7 +393,7 @@ mesh_lib_generic_client_publish(uint16_t model_id,
                                 uint16_t delay_ms,
                                 uint8_t request_flags)
 {
-  uint8_t buf[10];
+  uint8_t buf[LONGEST_REQUEST];
   size_t len;
 
   if (mesh_lib_serialize_request(request, buf, sizeof(buf), &len) != 0) {

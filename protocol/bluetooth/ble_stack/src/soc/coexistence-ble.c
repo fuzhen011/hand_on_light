@@ -289,6 +289,16 @@ static void pwmRequest(bool request)
   COEX_SetRequest(&ll_coex.pwmState, (request ? COEX_REQ_PWM : COEX_REQ_OFF) | (ll_coex.pwmPriority ? COEX_REQ_HIPRI : COEX_REQ_OFF), NULL);
 }
 
+static void coex_RequestCallback(COEX_Req_t coexStatus)
+{
+  if (coexStatus & COEX_REQCB_GRANTED) {
+    coex_counterGrantUpdate(true);
+  }
+  if (coexStatus & COEX_REQCB_NEGATED) {
+    coex_counterGrantUpdate(false);
+  }
+}
+
 /**
  * Set/clear request and priority signals.
  */
@@ -297,7 +307,7 @@ static void setRequest(bool request, uint8_t priority)
   bool priorityState = ll_coex.enablePriority && (priority <= ll_coex.config.threshold_coex_pri);
   coex_counterRequest(request, priorityState);
   if (request) {
-    COEX_SetRequest(&ll_coex.reqState, COEX_REQ_ON | (priorityState ? COEX_REQ_HIPRI : 0), NULL);
+    COEX_SetRequest(&ll_coex.reqState, COEX_REQ_ON | (priorityState ? COEX_REQ_HIPRI : 0) | (COEX_REQCB_GRANTED | COEX_REQCB_NEGATED), &coex_RequestCallback);
   } else {
     COEX_SetRequest(&ll_coex.reqState, COEX_REQ_OFF, NULL);
   }
@@ -324,6 +334,10 @@ static void randomBackoffDelay(uint16_t randomDelayMaskUs)
 
 static void coex_RadioCallback(COEX_Events_t events)
 {
+//  if (events & COEX_EVENT_GRANT_RELEASED){
+//	  coex_counterGrantUpdate();
+//  }
+
   if (events & COEX_EVENT_HOLDOFF_CHANGED) {
     coexUpdateGrant(true);
   }

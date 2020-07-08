@@ -41,6 +41,7 @@
 #include "em_device.h"
 
 #include "rail_types.h"
+#include "rail_features.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -54,7 +55,7 @@ extern "C" {
  * @def TRANSITION_TIME_US
  * @brief Time it takes to take care of protocol switching.
  */
-#define TRANSITION_TIME_US 435
+#define TRANSITION_TIME_US 455
 
 /**
  * @def EFR32XG1_RAIL_SCHEDULER_STATE_UINT32_BUFFER_SIZE
@@ -178,7 +179,6 @@ typedef struct RAIL_Config {
    *
    * @param[in] railHandle A handle for a RAIL instance.
    * @param[in] events A bit mask of RAIL events.
-   * @return void.
    *
    * See the \ref RAIL_Events_t documentation for the list of RAIL events.
    */

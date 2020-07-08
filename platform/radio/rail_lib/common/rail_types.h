@@ -126,7 +126,6 @@ RAIL_ENUM(RAIL_Status_t) {
  * A pointer to init complete callback function
  *
  * @param[in] railHandle A handle for RAIL instance.
- * @return void.
  *
  */
 typedef void (*RAIL_InitCompleteCallbackPtr_t)(RAIL_Handle_t railHandle);
@@ -154,7 +153,6 @@ typedef uint32_t RAIL_Time_t;
  * A pointer to the callback called when the RAIL timer expires.
  *
  * @param[in] cbArg The argument passed to the callback.
- * @return void.
  */
 typedef void (*RAIL_TimerCallback_t)(RAIL_Handle_t cbArg);
 
@@ -2318,7 +2316,11 @@ RAIL_ENUM_GENERIC(RAIL_RxOptions_t, uint32_t) {
  * will contain which sync word was detected. Note, this only affects which
  * sync word(s) are received, but not what each of the sync words actually are.
  * This feature may not be available on some combinations of chips, PHYs, and
- * protocols. See the data sheet or support team for more details.
+ * protocols. Use the compile time symbol RAIL_SUPPORTS_DUAL_SYNC_WORDS or
+ * the runtume call RAIL_SupportsDualSyncWords() to check whether the
+ * platform supports this feature. Also, DUALSYNC may be incompatible
+ * with certain radio configurations. In these cases, setting this bit will
+ * be ignored. See the data sheet or support team for more details.
  */
 #define RAIL_RX_OPTION_ENABLE_DUALSYNC (1UL << RAIL_RX_OPTION_ENABLE_DUALSYNC_SHIFT)
 
@@ -2849,7 +2851,6 @@ typedef struct RAIL_AutoAckConfig {
  *****************************************************************************/
 /**
  * @addtogroup External_Thermistor
- * @brief APIs to measure the external thermistor
  * @{
  */
 
@@ -2918,6 +2919,11 @@ typedef uint8_t (*RAIL_ConvertLqiCallback_t)(uint8_t lqi,
 typedef void (*RAIL_RfSense_CallbackPtr_t)(void);
 
 /**
+ * RF Sense low sensitivity offset.
+ */
+#define RAIL_RFSENSE_LOW_SENSITIVITY_OFFSET   (0x20U)
+
+/**
  * @enum RAIL_RfSenseBand_t
  * @brief An enumeration for specifying the RF Sense frequency band.
  */
@@ -2926,16 +2932,22 @@ RAIL_ENUM(RAIL_RfSenseBand_t) {
   RAIL_RFSENSE_2_4GHZ, /**< RF Sense is in 2.4 G band. */
   RAIL_RFSENSE_SUBGHZ, /**< RF Sense is in subgig band. */
   RAIL_RFSENSE_ANY,    /**< RF Sense is in both bands. */
-  RAIL_RFSENSE_MAX     // Must be last.
+  RAIL_RFSENSE_MAX,    // Must be last before sensitivity options.
+  RAIL_RFSENSE_2_4GHZ_LOW_SENSITIVITY = RAIL_RFSENSE_LOW_SENSITIVITY_OFFSET + RAIL_RFSENSE_2_4GHZ,  /**< RF Sense is in low sensitivity 2.4 G band */
+  RAIL_RFSENSE_SUBGHZ_LOW_SENSITIVITY = RAIL_RFSENSE_LOW_SENSITIVITY_OFFSET + RAIL_RFSENSE_SUBGHZ,  /**< RF Sense is in low sensitivity subgig band */
+  RAIL_RFENSE_ANY_LOW_SENSITIVITY = RAIL_RFSENSE_LOW_SENSITIVITY_OFFSET + RAIL_RFSENSE_ANY          /**< RF Sense is in low sensitivity for both bands. */
 };
 
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
 // Self-referencing defines minimize compiler complaints when using RAIL_ENUM
-#define RAIL_RFSENSE_OFF    ((RAIL_RfSenseBand_t) RAIL_RFSENSE_OFF)
-#define RAIL_RFSENSE_2_4GHZ ((RAIL_RfSenseBand_t) RAIL_RFSENSE_2_4GHZ)
-#define RAIL_RFSENSE_SUBGHZ ((RAIL_RfSenseBand_t) RAIL_RFSENSE_SUBGHZ)
-#define RAIL_RFSENSE_ANY    ((RAIL_RfSenseBand_t) RAIL_RFSENSE_ANY)
-#define RAIL_RFSENSE_MAX    ((RAIL_RfSenseBand_t) RAIL_RFSENSE_MAX)
+#define RAIL_RFSENSE_OFF                    ((RAIL_RfSenseBand_t) RAIL_RFSENSE_OFF)
+#define RAIL_RFSENSE_2_4GHZ                 ((RAIL_RfSenseBand_t) RAIL_RFSENSE_2_4GHZ)
+#define RAIL_RFSENSE_SUBGHZ                 ((RAIL_RfSenseBand_t) RAIL_RFSENSE_SUBGHZ)
+#define RAIL_RFSENSE_ANY                    ((RAIL_RfSenseBand_t) RAIL_RFSENSE_ANY)
+#define RAIL_RFSENSE_MAX                    ((RAIL_RfSenseBand_t) RAIL_RFSENSE_MAX)
+#define RAIL_RFSENSE_2_4GHZ_LOW_SENSITIVITY ((RAIL_RfSenseBand_t) RAIL_RFSENSE_2_4GHZ_LOW_SENSITIVITY)
+#define RAIL_RFSENSE_SUBGHZ_LOW_SENSITIVITY ((RAIL_RfSenseBand_t) RAIL_RFSENSE_SUBGHZ_LOW_SENSITIVITY)
+#define RAIL_RFENSE_ANY_LOW_SENSITIVITY     ((RAIL_RfSenseBand_t) RAIL_RFENSE_ANY_LOW_SENSITIVITY)
 #endif//DOXYGEN_SHOULD_SKIP_THIS
 
 /**

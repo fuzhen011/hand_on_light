@@ -2195,6 +2195,7 @@ void CMU_LFXOInit(const CMU_LFXOInit_TypeDef *lfxoInit)
   }
 }
 
+#if defined(PLFRCO_PRESENT)
 /**************************************************************************//**
  * @brief
  *   Configure the LFRCO precision.
@@ -2208,9 +2209,10 @@ void CMU_LFXOInit(const CMU_LFXOInit_TypeDef *lfxoInit)
  *****************************************************************************/
 void CMU_LFRCOSetPrecision(CMU_Precision_TypeDef precision)
 {
-#if defined(LFRCO_CFG_HIGHPRECEN)
   EFM_ASSERT(38400000 == SystemHFXOClockGet());
+
   CMU->CLKEN0_SET = CMU_CLKEN0_LFRCO;
+
   LFRCO->CTRL = LFRCO_CTRL_DISONDEMAND; // Force disable
   while ((LFRCO->STATUS & LFRCO_STATUS_ENS) != 0U) {
     // Wait for LFRCO to stop
@@ -2222,10 +2224,8 @@ void CMU_LFRCOSetPrecision(CMU_Precision_TypeDef precision)
     LFRCO->CFG = 0;
   }
   LFRCO->CTRL = _LFRCO_CTRL_RESETVALUE;
-#else
-  (void) precision;
-#endif
 }
+#endif
 
 /***************************************************************************//**
  * @brief
@@ -4035,13 +4035,7 @@ static uint32_t lfClkGet(CMU_Clock_TypeDef lfClkBranch)
       break;
 #endif
 
-#if defined(_CMU_LFACLKSEL_LFA_HFCLKLE)
-    case _CMU_LFACLKSEL_LFA_HFCLKLE:
-      ret = SystemCoreClockGet()
-            / SL_Log2ToDiv(((CMU->HFPRESC & _CMU_HFPRESC_HFCLKLEPRESC_MASK)
-                            >> _CMU_HFPRESC_HFCLKLEPRESC_SHIFT) + 1);
-      break;
-#elif defined(_CMU_LFBCLKSEL_LFB_HFCLKLE)
+#if defined(_CMU_LFBCLKSEL_LFB_HFCLKLE)
     case _CMU_LFBCLKSEL_LFB_HFCLKLE:
       ret = SystemHFClockGet()
             / SL_Log2ToDiv(((CMU->HFPRESC & _CMU_HFPRESC_HFCLKLEPRESC_MASK)
@@ -6108,12 +6102,6 @@ CMU_Select_TypeDef CMU_ClockSelectGet(CMU_Clock_TypeDef clock)
           ret = cmuSelect_ULFRCO;
           break;
 
-#if defined(_CMU_LFACLKSEL_LFA_HFCLKLE)
-        case CMU_LFACLKSEL_LFA_HFCLKLE:
-          ret = cmuSelect_HFCLKLE;
-          break;
-#endif
-
 #if defined(PLFRCO_PRESENT)
         case CMU_LFACLKSEL_LFA_PLFRCO:
           ret = cmuSelect_PLFRCO;
@@ -6228,12 +6216,6 @@ CMU_Select_TypeDef CMU_ClockSelectGet(CMU_Clock_TypeDef clock)
         case CMU_LFECLKSEL_LFE_ULFRCO:
           ret = cmuSelect_ULFRCO;
           break;
-
-#if defined(_CMU_LFECLKSEL_LFE_HFCLKLE)
-        case CMU_LFECLKSEL_LFE_HFCLKLE:
-          ret = cmuSelect_HFCLKLE;
-          break;
-#endif
 
 #if defined(PLFRCO_PRESENT)
         case CMU_LFECLKSEL_LFE_PLFRCO:
@@ -6741,30 +6723,24 @@ void CMU_ClockSelectSet(CMU_Clock_TypeDef clock, CMU_Select_TypeDef ref)
 #if defined(_SILICON_LABS_32B_SERIES_1)
     case CMU_LFACLKSEL_REG:
       selReg = &CMU->LFACLKSEL;
-#if !defined(_CMU_LFACLKSEL_LFA_HFCLKLE)
       /* HFCLKCLE can't be used as LFACLK. */
       EFM_ASSERT(ref != cmuSelect_HFCLKLE);
-#endif
       SL_FALLTHROUGH
       /* Fall through and select the clock source. */
 
 #if defined(_CMU_LFCCLKSEL_MASK)
     case CMU_LFCCLKSEL_REG:
       selReg = (selReg == NULL) ? &CMU->LFCCLKSEL : selReg;
-#if !defined(_CMU_LFCCLKSEL_LFC_HFCLKLE)
       /* HFCLKCLE can't be used as LFCCLK. */
       EFM_ASSERT(ref != cmuSelect_HFCLKLE);
-#endif
       SL_FALLTHROUGH
 #endif
     /* Fall through and select the clock source. */
 
     case CMU_LFECLKSEL_REG:
       selReg = (selReg == NULL) ? &CMU->LFECLKSEL : selReg;
-#if !defined(_CMU_LFECLKSEL_LFE_HFCLKLE)
       /* HFCLKCLE can't be used as LFECLK. */
       EFM_ASSERT(ref != cmuSelect_HFCLKLE);
-#endif
       SL_FALLTHROUGH
     /* Fall through and select the clock source. */
 

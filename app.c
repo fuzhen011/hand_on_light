@@ -32,6 +32,8 @@
 #include "lightbulb.h"
 #include "light_controller.h"
 #include "scenes.h"
+#include "time.h"
+#include "scheduler.h"
 
 /* Display Interface header */
 #include "display_interface.h"
@@ -188,6 +190,8 @@ void gecko_bgapi_classes_init(void)
   gecko_bgapi_class_mesh_lc_setup_server_init();
   gecko_bgapi_class_mesh_scene_server_init();
   gecko_bgapi_class_mesh_scene_setup_server_init();
+  gecko_bgapi_class_mesh_time_server_init();
+  gecko_bgapi_class_mesh_scheduler_server_init();
 }
 
 /*******************************************************************************
@@ -373,6 +377,17 @@ void handle_gecko_event(uint32_t evt_id, struct gecko_cmd_packet *evt)
     case gecko_evt_mesh_scene_setup_server_delete_id:
     case gecko_evt_mesh_scene_setup_server_publish_id:
       handle_scenes_server_events(evt);
+      break;
+
+    case gecko_evt_mesh_time_server_time_updated_id:
+    case gecko_evt_mesh_time_server_time_zone_offset_updated_id:
+    case gecko_evt_mesh_time_server_tai_utc_delta_updated_id:
+    case gecko_evt_mesh_time_server_time_role_updated_id:
+      handle_time_server_events(evt);
+      break;
+
+    case gecko_evt_mesh_scheduler_server_action_changed_id:
+      handle_scheduler_server_events(evt);
       break;
 
     case gecko_evt_mesh_node_reset_id:

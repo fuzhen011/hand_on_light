@@ -41,6 +41,8 @@
 
 #define SLEEPTIMER_TMR_WIDTH (_RTCC_CNT_MASK)
 
+static bool cc_disabled = true;
+
 __STATIC_INLINE uint32_t get_time_diff(uint32_t a,
                                        uint32_t b);
 
@@ -58,6 +60,9 @@ void sleeptimer_hal_init_timer(void)
   rtcc_init.presc = (RTCC_CntPresc_TypeDef)(CMU_PrescToLog2(SL_SLEEPTIMER_FREQ_DIVIDER - 1));
 
   RTCC_Init(&rtcc_init);
+
+  // Compare channel starts disabled and is enabled only when compare match interrupt is enabled.
+  channel.chMode = rtccCapComChModeOff;
   RTCC_ChannelInit(1u, &channel);
 
   RTCC_IntDisable(_RTCC_IEN_MASK);
@@ -106,6 +111,11 @@ void sleeptimer_hal_set_compare(uint32_t value)
     RTCC_ChannelCCVSet(1u, compare_value);
     sleeptimer_hal_enable_int(SLEEPTIMER_EVENT_COMP);
   }
+
+  if (cc_disabled) {
+    RTCC->CC[1].CTRL |= RTCC_CC_CTRL_MODE_OUTPUTCOMPARE;
+    cc_disabled = false;
+  }
 }
 
 /******************************************************************************
@@ -139,9 +149,38 @@ void sleeptimer_hal_disable_int(uint8_t local_flag)
 
   if (local_flag & SLEEPTIMER_EVENT_COMP) {
     rtcc_int_dis |= RTCC_IEN_CC1;
+
+    cc_disabled = true;
+    RTCC->CC[1].CTRL &= ~_RTCC_CC_CTRL_MODE_MASK;
   }
 
   RTCC_IntDisable(rtcc_int_dis);
+}
+
+/******************************************************************************
+ * Gets status of specified interrupt.
+ *
+ * Note: This function must be called with interrupts disabled.
+ *****************************************************************************/
+bool sleeptimer_hal_is_int_status_set(uint8_t local_flag)
+{
+  bool int_is_set = false;
+  uint32_t irq_flag = RTCC_IntGet();
+
+  switch (local_flag) {
+    case SLEEPTIMER_EVENT_COMP:
+      int_is_set = ((irq_flag & RTCC_IF_CC1) == RTCC_IF_CC1);
+      break;
+
+    case SLEEPTIMER_EVENT_OF:
+      int_is_set = ((irq_flag & RTCC_IF_OF) == RTCC_IF_OF);
+      break;
+
+    default:
+      break;
+  }
+
+  return int_is_set;
 }
 
 /*******************************************************************************

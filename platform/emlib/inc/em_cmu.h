@@ -104,6 +104,10 @@ extern "C" {
 #define VSCALE_EM01_LOW_POWER           1
 #define VSCALE_EM01_HIGH_PERFORMANCE    0
 
+#if defined(LFRCO_PRECISION_MODE) && LFRCO_PRECISION_MODE
+#define PLFRCO_PRESENT
+#endif
+
 /** @endcond */
 
 /*******************************************************************************
@@ -729,7 +733,6 @@ void                       CMU_HFRCODPLLBandSet(CMU_HFRCODPLLFreq_TypeDef freq);
 bool                       CMU_DPLLLock(const CMU_DPLLInit_TypeDef *init);
 void                       CMU_HFXOInit(const CMU_HFXOInit_TypeDef *hfxoInit);
 void                       CMU_LFXOInit(const CMU_LFXOInit_TypeDef *lfxoInit);
-void                       CMU_LFRCOSetPrecision(CMU_Precision_TypeDef precision);
 uint32_t                   CMU_OscillatorTuningGet(CMU_Osc_TypeDef osc);
 void                       CMU_OscillatorTuningSet(CMU_Osc_TypeDef osc,
                                                    uint32_t val);
@@ -742,6 +745,10 @@ void                       CMU_ClockEnable(CMU_Clock_TypeDef clock, bool enable)
 #if defined(_SILICON_LABS_32B_SERIES_2_CONFIG_1)
 CMU_HFRCOEM23Freq_TypeDef  CMU_HFRCOEM23BandGet(void);
 void                       CMU_HFRCOEM23BandSet(CMU_HFRCOEM23Freq_TypeDef freq);
+#endif
+
+#if defined(PLFRCO_PRESENT)
+void                       CMU_LFRCOSetPrecision(CMU_Precision_TypeDef precision);
 #endif
 
 #if defined(_SILICON_LABS_32B_SERIES_2_CONFIG_1)

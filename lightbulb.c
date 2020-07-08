@@ -19,6 +19,8 @@
 #include "lightbulb.h"
 #include "light_controller.h"
 #include "scenes.h"
+#include "time.h"
+#include "scheduler.h"
 
 /* C Standard Library headers */
 #include <stdlib.h>
@@ -161,9 +163,8 @@ static uint32_t move_sec_level_trans = 0;
 /// copy of move delta parameter for secondary generic request
 static int16_t move_sec_level_delta = 0;
 
-static int lightbulb_state_load(void);
-static int lightbulb_state_store(void);
 static void lightbulb_state_changed(void);
+static errorcode_t ctl_temperature_update(uint16_t element_index, uint32_t remaining_ms);
 
 /***********************************************************************************************//**
  * \defgroup mesh_models Mesh Models
@@ -350,6 +351,8 @@ static void onoff_request(uint16_t model_id,
       gecko_cmd_hardware_set_soft_timer(TIMER_MS_2_TIMERTICK(transition_ms), TIMER_ID_ONOFF_TRANSITION, 1);
     }
     lightbulb_state_changed();
+    // State has changed, so the current scene number is reset
+    gecko_cmd_mesh_scene_server_reset_register(element_index);
   }
 
   uint32_t remaining_ms = delay_ms + transition_ms;
@@ -1011,6 +1014,8 @@ static void lightness_request(uint16_t model_id,
       gecko_cmd_hardware_set_soft_timer(TIMER_MS_2_TIMERTICK(transition_ms), TIMER_ID_LIGHTNESS_TRANSITION, 1);
     }
     lightbulb_state_changed();
+    // State has changed, so the current scene number is reset
+    gecko_cmd_mesh_scene_server_reset_register(element_index);
   }
 
   uint32_t remaining_ms = delay_ms + transition_ms;
@@ -1634,6 +1639,8 @@ static void pri_level_request(uint16_t model_id,
                                             TIMER_ID_PRI_LEVEL_TRANSITION,
                                             1);
         }
+        // State has changed, so the current scene number is reset
+        gecko_cmd_mesh_scene_server_reset_register(element_index);
       }
 
       remaining_ms = delay_ms + transition_ms;
@@ -1682,6 +1689,8 @@ static void pri_level_request(uint16_t model_id,
           pri_level_move_schedule_next_request(remaining_delta);
         }
         remaining_ms = UNKNOWN_REMAINING_TIME;
+        // State has changed, so the current scene number is reset
+        gecko_cmd_mesh_scene_server_reset_register(element_index);
       }
       break;
 
@@ -2054,6 +2063,8 @@ static void ctl_request(uint16_t model_id,
       gecko_cmd_hardware_set_soft_timer(TIMER_MS_2_TIMERTICK(transition_ms), TIMER_ID_CTL_TRANSITION, 1);
     }
     lightbulb_state_changed();
+    // State has changed, so the current scene number is reset
+    gecko_cmd_mesh_scene_server_reset_register(element_index);
   }
 
   uint32_t remaining_ms = delay_ms + transition_ms;
@@ -2170,7 +2181,16 @@ static void ctl_recall(uint16_t model_id,
     lightbulb_state_changed();
   }
 
-  ctl_update_and_publish(element_index, transition_ms);
+  // Lightness substate is updated in lightness_recall, here only temperature
+  // substate is updated, it is needed also for LC recall to not set LC mode
+  // to zero by bindings
+  errorcode_t e;
+  e = ctl_temperature_update(element_index + 1, transition_ms);
+  if (e == bg_err_success) {
+    e = mesh_lib_generic_server_publish(MESH_LIGHTING_CTL_SERVER_MODEL_ID,
+                                        element_index,
+                                        mesh_lighting_state_ctl);
+  }
 }
 
 /***************************************************************************//**
@@ -2638,6 +2658,8 @@ static void ctl_temperature_request(uint16_t model_id,
       gecko_cmd_hardware_set_soft_timer(TIMER_MS_2_TIMERTICK(transition_ms), TIMER_ID_CTL_TEMP_TRANSITION, 1);
     }
     lightbulb_state_changed();
+    // State has changed, so the current scene number is reset
+    gecko_cmd_mesh_scene_server_reset_register(element_index);
   }
 
   uint32_t remaining_ms = delay_ms + transition_ms;
@@ -3063,6 +3085,8 @@ static void sec_level_request(uint16_t model_id,
                                             TIMER_ID_SEC_LEVEL_TRANSITION,
                                             1);
         }
+        // State has changed, so the current scene number is reset
+        gecko_cmd_mesh_scene_server_reset_register(element_index);
       }
 
       remaining_ms = delay_ms + transition_ms;
@@ -3111,6 +3135,8 @@ static void sec_level_request(uint16_t model_id,
           sec_level_move_schedule_next_request(remaining_delta);
         }
         remaining_ms = UNKNOWN_REMAINING_TIME;
+        // State has changed, so the current scene number is reset
+        gecko_cmd_mesh_scene_server_reset_register(element_index);
       }
       break;
 
@@ -3376,6 +3402,65 @@ static void init_models(void)
  **************************************************************************************************/
 
 /***************************************************************************//**
+ * This function validates the lighbulb_state and change it if it is against
+ * the specification.
+ ******************************************************************************/
+static void lightbulb_state_validate_and_correct(void)
+{
+  if (lightbulb_state.lightness_min > lightbulb_state.lightness_max) {
+    lightbulb_state.lightness_min = lightbulb_state.lightness_max;
+  }
+  if (lightbulb_state.lightness_default) {
+    if (lightbulb_state.lightness_default < lightbulb_state.lightness_min) {
+      lightbulb_state.lightness_default = lightbulb_state.lightness_min;
+    }
+    if (lightbulb_state.lightness_default > lightbulb_state.lightness_max) {
+      lightbulb_state.lightness_default = lightbulb_state.lightness_max;
+    }
+  }
+  if (lightbulb_state.lightness_current < lightbulb_state.lightness_min) {
+    lightbulb_state.lightness_current = lightbulb_state.lightness_min;
+  }
+  if (lightbulb_state.lightness_current > lightbulb_state.lightness_max) {
+    lightbulb_state.lightness_current = lightbulb_state.lightness_max;
+  }
+  if (lightbulb_state.lightness_target < lightbulb_state.lightness_min) {
+    lightbulb_state.lightness_target = lightbulb_state.lightness_min;
+  }
+  if (lightbulb_state.lightness_target > lightbulb_state.lightness_max) {
+    lightbulb_state.lightness_target = lightbulb_state.lightness_max;
+  }
+
+  if (lightbulb_state.temperature_min < MIN_TEMPERATURE) {
+    lightbulb_state.temperature_min = MIN_TEMPERATURE;
+  }
+  if (lightbulb_state.temperature_min > MAX_TEMPERATURE) {
+    lightbulb_state.temperature_min = MAX_TEMPERATURE;
+  }
+  if (lightbulb_state.temperature_min > lightbulb_state.temperature_max) {
+    lightbulb_state.temperature_min = lightbulb_state.temperature_max;
+  }
+  if (lightbulb_state.temperature_default < lightbulb_state.temperature_min) {
+    lightbulb_state.temperature_default = lightbulb_state.temperature_min;
+  }
+  if (lightbulb_state.temperature_default > lightbulb_state.temperature_max) {
+    lightbulb_state.temperature_default = lightbulb_state.temperature_max;
+  }
+  if (lightbulb_state.temperature_current < lightbulb_state.temperature_min) {
+    lightbulb_state.temperature_current = lightbulb_state.temperature_min;
+  }
+  if (lightbulb_state.temperature_current > lightbulb_state.temperature_max) {
+    lightbulb_state.temperature_current = lightbulb_state.temperature_max;
+  }
+  if (lightbulb_state.temperature_target < lightbulb_state.temperature_min) {
+    lightbulb_state.temperature_target = lightbulb_state.temperature_min;
+  }
+  if (lightbulb_state.temperature_target > lightbulb_state.temperature_max) {
+    lightbulb_state.temperature_target = lightbulb_state.temperature_max;
+  }
+}
+
+/***************************************************************************//**
  * This function loads the saved light state from Persistent Storage and
  * copies the data in the global variable lightbulb_state.
  * If PS key with ID 0x4004 does not exist or loading failed,
@@ -3400,6 +3485,9 @@ static int lightbulb_state_load(void)
     lightbulb_state.temperature_min = MIN_TEMPERATURE;
     lightbulb_state.temperature_max = MAX_TEMPERATURE;
     lightbulb_state.deltauv_default = DEFAULT_DELTAUV;
+
+    /* Check if default values are valid and correct them if needed */
+    lightbulb_state_validate_and_correct();
     return -1;
   }
 
@@ -3469,6 +3557,8 @@ void lightbulb_state_init(void)
 
   lc_init(_secondary_elem_index);
   scenes_init(_primary_elem_index);
+  time_init(_primary_elem_index);
+  scheduler_init(_primary_elem_index);
 
   // Handle on power up behavior
   uint32_t transition_ms = default_transition_time();
@@ -3576,10 +3666,16 @@ void lightbulb_state_init(void)
 
   lightbulb_state_changed();
   init_models();
+  lightness_setup_update(_primary_elem_index, mesh_lighting_state_lightness_default);
+  lightness_setup_update(_primary_elem_index, mesh_lighting_state_lightness_range);
+  ctl_setup_update(_primary_elem_index, mesh_lighting_state_ctl_default);
+  ctl_setup_update(_primary_elem_index, mesh_lighting_state_ctl_temperature_range);
   lc_onpowerup_update(_secondary_elem_index, lightbulb_state.onpowerup);
-  onoff_update_and_publish(_primary_elem_index, IMMEDIATE);
   power_onoff_update_and_publish(_primary_elem_index);
-  lightness_update_and_publish(_primary_elem_index, IMMEDIATE, mesh_lighting_state_lightness_actual);
+  if (lc_get_mode() == 0) {
+    onoff_update_and_publish(_primary_elem_index, IMMEDIATE);
+    lightness_update_and_publish(_primary_elem_index, IMMEDIATE, mesh_lighting_state_lightness_actual);
+  }
   ctl_temperature_update_and_publish(_secondary_elem_index, IMMEDIATE);
 }
 

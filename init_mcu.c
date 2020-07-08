@@ -164,7 +164,4 @@ static void initHFXO(void)
   }
 #endif
   CMU_HFXOInit(&hfxoInit);
-
-  // Set system HFXO frequency
-  SystemHFXOClockSet(BSP_CLK_HFXO_FREQ);
 }

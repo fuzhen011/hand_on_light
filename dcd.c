@@ -32,7 +32,7 @@ const uint8_t __mesh_dcd[] = {
     0x07, 0x00, /* Features Bitmask = 0x0007 */
     /* Begin Primary Element */
         0x00, 0x00, /* Location = 0x0000 */
-        0x0f, /* Number of SIG Models = 0x0f */
+        0x13, /* Number of SIG Models = 0x0f */
         0x00, /* Number of Vendor Models = 0x00 */
         /* Begin SIG Models */
         0x00, 0x00, /* Configuration Server */
@@ -50,6 +50,10 @@ const uint8_t __mesh_dcd[] = {
         0x04, 0x12, /* Scene Setup Server */
         0x00, 0x11, /* Sensor Server */
         0x01, 0x11, /* Sensor Setup Server */
+		0x00, 0x12, /* Time Server */
+        0x01, 0x12, /* Time Setup Server */
+        0x06, 0x12, /* Scheduler Server */
+        0x07, 0x12, /* Scheduler Setup Server */
         /* End SIG Models */
         /* Begin Vendor Models */
         /* End Vendor Models */
@@ -98,5 +102,6 @@ const mesh_memory_config_t __mesh_memory_config = {
   .pstore_write_interval_elem_seq = 65536,
   .friend_max_total_cache = MESH_CFG_FRIEND_MAX_TOTAL_CACHE,
   .friend_max_single_cache = MESH_CFG_FRIEND_MAX_SINGLE_CACHE,
-  .friend_max_subs_list = MESH_CFG_FRIEND_MAX_SUBS_LIST
+  .friend_max_subs_list = MESH_CFG_FRIEND_MAX_SUBS_LIST,
+  .app_send_max_queue = MESH_CFG_MAX_APP_SEND_QUEUE
 };

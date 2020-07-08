@@ -193,4 +193,5 @@ bool gecko_getCoexCounters(const void **ptr, uint8_t *size);
 void coex_counterRequest(bool request, bool priority);
 void coex_counterGrantUpdate(bool state);
 void coex_counterIncrementDenied(void);
+
 #endif

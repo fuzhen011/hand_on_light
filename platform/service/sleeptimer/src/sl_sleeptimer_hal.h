@@ -100,6 +100,16 @@ void sleeptimer_hal_enable_int(uint8_t local_flag);
 void sleeptimer_hal_disable_int(uint8_t local_flag);
 
 /*******************************************************************************
+ * Hardware Abstraction Layer to get interrupt status.
+ *
+ * @param local_flag Internal interrupt flag. Only a single flag can be
+ *                   specified per call.
+ *
+ * @return Boolean indicating if specified interrupt is set.
+ ******************************************************************************/
+bool sleeptimer_hal_is_int_status_set(uint8_t local_flag);
+
+/*******************************************************************************
  * Process the timer interrupt.
  *
  * @param flags Internal interrupt flag.

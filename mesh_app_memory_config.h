@@ -22,9 +22,8 @@
 #ifndef _MESH_APP_MEMORY_CONFIG_H
 #define _MESH_APP_MEMORY_CONFIG_H
 
-
 #define MESH_CFG_MAX_ELEMENTS                   2
-#define MESH_CFG_MAX_MODELS                     20
+#define MESH_CFG_MAX_MODELS                     24
 #define MESH_CFG_MAX_APP_BINDS                  4
 #define MESH_CFG_MAX_SUBSCRIPTIONS              4
 #define MESH_CFG_MAX_NETKEYS                    4
@@ -46,5 +45,10 @@
 #define MESH_CFG_FRIEND_MAX_SUBS_LIST           5
 #define MESH_CFG_FRIEND_MAX_TOTAL_CACHE         5
 #define MESH_CFG_FRIEND_MAX_SINGLE_CACHE        5
+#define MESH_CFG_MAX_APP_SEND_QUEUE             5
+#define MESH_CFG_SCENE_CLIENT_MODELS            0
+#define MESH_CFG_SCENE_SERVER_MODELS            1
+#define MESH_CFG_LC_CLIENT_MODELS               0
+#define MESH_CFG_LC_SERVER_MODELS               1
 
 #endif

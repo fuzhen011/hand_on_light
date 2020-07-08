@@ -95,7 +95,7 @@ const gecko_configuration_t config =
   .bluetooth.heap_size = sizeof(bluetooth_stack_heap) - BTMESH_HEAP_SIZE,
 #if defined(FEATURE_LFXO)
   .bluetooth.sleep_clock_accuracy = 100, // ppm
-#elif defined(PLFRCO_PRESENT) || defined(LFRCO_PRESENT)
+#elif defined(PLFRCO_PRESENT)
   .bluetooth.sleep_clock_accuracy = 500, // ppm
 #endif
   .bluetooth.linklayer_priorities = &linklayer_priorities,

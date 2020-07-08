@@ -196,9 +196,9 @@
 
 #define BOARD_LED_PORT            gpioPortD       /**< LED port                         */
 #define BOARD_LED_RED_PORT        gpioPortD       /**< Red LED port                     */
-#define BOARD_LED_RED_PIN         9               /**< Red LED pin                      */
+#define BOARD_LED_RED_PIN         8               /**< Red LED pin                      */
 #define BOARD_LED_GREEN_PORT      gpioPortD       /**< Green LED port                   */
-#define BOARD_LED_GREEN_PIN       8               /**< Green LED pin                    */
+#define BOARD_LED_GREEN_PIN       9               /**< Green LED pin                    */
 #define BOARD_RGBLED_PWR_EN_PORT  gpioPortJ       /**< RGB LED Power Enable port        */
 #define BOARD_RGBLED_PWR_EN_PIN   14              /**< RGB LED Power Enable pin         */
 #define BOARD_RGBLED_COM_PORT     gpioPortI       /**< RGB LED COM port                 */

@@ -74,7 +74,6 @@ extern "C" {
  *   populate with version information.
  * @param[in] verbose Populate \ref RAIL_Version_t struct with verbose
  *   information.
- * @return void.
  *
  * The version information contains a major version number, a minor version
  * number, and a rev (revision) number.
@@ -526,6 +525,34 @@ RAIL_Status_t RAIL_SetPaCTune(RAIL_Handle_t railHandle,
                               uint8_t txPaCtuneValue,
                               uint8_t rxPaCtuneValue);
 
+/**
+ * Get the sync words and their length.
+ *
+ * @param[in] railHandle A RAIL instance handle.
+ * @param[out] syncWordConfig An application-provided non-NULL pointer to store
+ *                            \ref RAIL_SyncWordConfig_t sync word information.
+ * @return Status code indicating success of the function call.
+ **/
+RAIL_Status_t RAIL_GetSyncWords(RAIL_Handle_t railHandle,
+                                RAIL_SyncWordConfig_t *syncWordConfig);
+
+/**
+ * Set the selected sync words and their length.
+ *
+ * @param[in] railHandle A RAIL instance handle.
+ * @param[in] syncWordConfig A non-NULL pointer to \ref RAIL_SyncWordConfig_t
+ *                           specifying the sync words and their length.
+ * The desired length should be between 2 and 32 bits inclusive.
+ * Other values will result in \ref RAIL_STATUS_INVALID_PARAMETER. The default
+ * syncWord continues to be valid.
+ * @return Status code indicating success of the function call.
+ * When the custom sync word(s) applied by this API are no longer needed, or to
+ * revert to default sync word, calling RAIL_ConfigChannels() will re-establish
+ * the sync words specified in the radio configuration.
+ **/
+RAIL_Status_t RAIL_ConfigSyncWords(RAIL_Handle_t railHandle,
+                                   const RAIL_SyncWordConfig_t *syncWordConfig);
+
 /** @} */ // end of group Radio_Configuration
 
 /******************************************************************************
@@ -623,8 +650,6 @@ RAIL_Time_t RAIL_GetTimer(RAIL_Handle_t railHandle);
  * Stop the currently scheduled RAIL timer.
  *
  * @param[in] railHandle A RAIL instance handle.
- * @return void.
- *
  * Cancels the timer. If this function is called before the timer expires,
  * the cb callback specified in the earlier RAIL_SetTimer() call will never
  * be called.
@@ -1513,7 +1538,6 @@ uint16_t RAIL_GetRxFifoThreshold(RAIL_Handle_t railHandle);
  * @param[in] railHandle A RAIL instance handle.
  * @param[in] txFifo If true, reset the transmit FIFO.
  * @param[in] rxFifo If true, reset the receive FIFO.
- * @return void.
  *
  * This function can reset each FIFO independently.
  * The application should not reset the receive FIFO while receiving a frame,
@@ -1641,7 +1665,6 @@ RAIL_Status_t RAIL_SetStateTiming(RAIL_Handle_t railHandle,
  * @param[in] mode The method for shutting down the radio.
  * @param[in] wait Whether this function should wait for the radio to reach
  *   idle before returning.
- * @return void.
  *
  * This function is used to remove the radio from TX and RX states. How these
  * states are left is defined by the mode parameter.
@@ -2014,7 +2037,7 @@ RAIL_Status_t RAIL_SetTxPowerDbm(RAIL_Handle_t railHandle,
 /// // by default, or the customer version, if overwritten.
 /// RAIL_TxPower_t power = RAIL_ConvertRawToDbm(railHandle,
 ///                                             txPowerConfig.mode,
-///                                             power);
+///                                             powerLevel);
 /// return power;
 /// @endcode
 ///
@@ -2062,7 +2085,7 @@ bool RAIL_IsPaAutoModeEnabled(RAIL_Handle_t railHandle);
  * @param[in,out] power Pointer to the dBm output power (in deci-dBm, 10*dBm)
  * being requested. The value this points to when the function returns
  * will be applied to the radio.
- * @param[out] mode Pointer to The \ref RAIL_TxPowerMode_t to be used to
+ * @param[out] mode Pointer to the \ref RAIL_TxPowerMode_t to be used to
  * achieve the requested power. The value this points to when the function
  * returns will be applied to the radio.
  * @param[in] chCfgEntry Pointer to a \ref RAIL_ChannelConfigEntry_t.
@@ -2402,7 +2425,6 @@ RAIL_Status_t RAIL_GetTxTimeFrameEnd(RAIL_Handle_t railHandle,
  *
  * @param[in] railHandle A RAIL instance handle.
  * @param[in] enable Enable/Disable TX hold off.
- * @return void.
  *
  * Enable TX hold off to prevent the radio from starting any transmits.
  * Disable TX hold off to allow the radio to transmit again.
@@ -2441,34 +2463,6 @@ bool RAIL_IsTxHoldOffEnabled(RAIL_Handle_t railHandle);
  **/
 RAIL_Status_t RAIL_SetTxAltPreambleLength(RAIL_Handle_t railHandle, uint16_t length);
 
-/**
- * Get the sync words and their length.
- *
- * @param[in] railHandle A RAIL instance handle.
- * @param[out] syncWordConfig An application-provided non-NULL pointer to store
- *                            \ref RAIL_SyncWordConfig_t sync word information.
- * @return Status code indicating success of the function call.
- **/
-RAIL_Status_t RAIL_GetSyncWords(RAIL_Handle_t railHandle,
-                                RAIL_SyncWordConfig_t *syncWordConfig);
-
-/**
- * Set the selected sync words and their length.
- *
- * @param[in] railHandle A RAIL instance handle.
- * @param[in] syncWordConfig A non-NULL pointer to \ref RAIL_SyncWordConfig_t
- *                           specifying the sync words and their length.
- * The desired length should be between 2 and 32 bits inclusive.
- * Other values will result in \ref RAIL_STATUS_INVALID_PARAMETER. The default
- * syncWord continues to be valid.
- * @return Status code indicating success of the function call.
- * When the custom sync word(s) applied by this API are no longer needed, or to
- * revert to default sync word, calling RAIL_ConfigChannels() will re-establish
- * the sync words specified in the radio configuration.
- **/
-RAIL_Status_t RAIL_ConfigSyncWords(RAIL_Handle_t railHandle,
-                                   const RAIL_SyncWordConfig_t *syncWordConfig);
-
 /** @} */ // end of group Transmit
 
 /******************************************************************************
@@ -2503,7 +2497,6 @@ RAIL_Status_t RAIL_ConfigRxOptions(RAIL_Handle_t railHandle,
  * Include the code necessary for frame type based length decoding.
  *
  * @param[in] railHandle A RAIL instance handle.
- * @return void.
  *
  * This function must be called before \ref RAIL_ConfigChannels to allow configurations
  * using a frame type based length setup. In RAIL 2.x, it is called by default
@@ -2518,7 +2511,6 @@ void RAIL_IncludeFrameTypeLength(RAIL_Handle_t railHandle);
  *
  * @param[in] railHandle A RAIL instance handle.
  * @param[in] frameType A frame type configuration structure.
- * @return void.
  *
  * This function is implemented in the radio configuration.
  * Currently, the frame type passed in only handles packet length decoding. If
@@ -2692,7 +2684,6 @@ void RAIL_GetRxIncomingPacketInfo(RAIL_Handle_t railHandle,
  *   Exactly pPacketInfo->packetBytes of packet data will be written into it.
  * @param[in] pPacketInfo
  *   \ref RAIL_RxPacketInfo_t for the requested packet.
- * @return void.
  *
  * @note This is a convenience helper function, which
  * is intended to be expedient. As a result, it does not
@@ -3067,6 +3058,10 @@ int16_t RAIL_GetRssi(RAIL_Handle_t railHandle, bool wait);
  * Also in multiprotocol, the user is required to call \ref RAIL_YieldRadio
  * after this event completes (i.e., when \ref RAIL_EVENT_RSSI_AVERAGE_DONE
  * occurs).
+ *
+ * @note If the radio is idled while RSSI averaging is still in effect, a
+ *   \ref RAIL_EVENT_RSSI_AVERAGE_DONE event may not occur and
+ *   \ref RAIL_IsAverageRssiReady may never return true.
  */
 RAIL_Status_t RAIL_StartAverageRssi(RAIL_Handle_t railHandle,
                                     uint16_t channel,
@@ -3081,6 +3076,9 @@ RAIL_Status_t RAIL_StartAverageRssi(RAIL_Handle_t railHandle,
  *
  * This function can be used to poll for completion of the RSSI averaging
  * to avoid relying on an interrupt-based callback.
+ *
+ * @note If the radio is idled while RSSI averaging is still in effect,
+ *   this function may never return true.
  */
 bool RAIL_IsAverageRssiReady(RAIL_Handle_t railHandle);
 
@@ -3244,7 +3242,6 @@ bool RAIL_IsAddressFilterEnabled(RAIL_Handle_t railHandle);
  * Reset the address filtering configuration.
  *
  * @param[in] railHandle A RAIL instance handle.
- * @return void.
  *
  * Resets all structures related to address filtering. This does not disable
  * address filtering. It leaves the radio in a state where no packets
@@ -3467,7 +3464,6 @@ RAIL_Status_t RAIL_WriteAutoAckFifo(RAIL_Handle_t railHandle,
  *
  * @param[in] railHandle A RAIL instance handle.
  * @param[in] pause Pause or resume RX auto-ACKing.
- * @return void.
  *
  * When RX auto-ACKing is paused, the radio transitions to default
  * state after receiving a packet and does not transmit an ACK.
@@ -3490,7 +3486,6 @@ bool RAIL_IsRxAutoAckPaused(RAIL_Handle_t railHandle);
  *
  * @param[in] railHandle A RAIL instance handle.
  * @param[in] pause Pause or resume TX auto-ACKing.
- * @return void.
  *
  * When TX auto-ACKing is paused, the radio transitions to a default
  * state after transmitting a packet and does not wait for an ACK. When TX
@@ -3687,7 +3682,6 @@ RAIL_CalMask_t RAIL_GetPendingCal(RAIL_Handle_t railHandle);
  * Enable/disable the PA calibration.
  *
  * @param[in] enable Enables/disables the PA calibration.
- * @return void.
  *
  * Enabling will ensure that the PA power remains constant chip-to-chip.
  * By default, this feature is disabled after reset.
@@ -3758,15 +3752,14 @@ RAIL_Time_t RAIL_StartRfSense(RAIL_Handle_t railHandle,
  * @return Status code indicating success of the function call.
  *
  * Some chips support Selective RF energy detection (OOK mode) where the
- * user can program the chip to look for a particular preamble and sync word
- * pattern (1byte - 4bytes) sent using OOK and wake only when that is detected.
+ * user can program the chip to look for a particular sync word pattern
+ * (1byte - 4bytes) sent using OOK and wake only when that is detected.
  * See chip-specific documentation for more details.
  *
  * The following code gives an example of how to use RF Sense functionality
  * in Selective(OOK Based) Mode.
  * @code{.c}
  *
- * #define PREAMBLE         (0x55U)
  * // Syncword Length in bytes, 1-4 bytes.
  * #define NUMSYNCWORDBYTES (2U)
  * // Syncword Value.
@@ -3775,7 +3768,7 @@ RAIL_Time_t RAIL_StartRfSense(RAIL_Handle_t railHandle,
  * // Configure the transmitting node for sending the wakeup packet.
  * RAIL_Idle(railHandle, RAIL_IDLE_ABORT, true);
  * RAIL_ConfigRfSenseSelectiveOokWakeupPhy(railHandle);
- * RAIL_SetRfSenseSelectiveOokWakeupPayload(railHandle, PREAMBLE, NUMSYNCWORDBYTES, SYNCWORD);
+ * RAIL_SetRfSenseSelectiveOokWakeupPayload(railHandle, NUMSYNCWORDBYTES, SYNCWORD);
  * RAIL_StartTx(railHandle, channel, RAIL_TX_OPTIONS_DEFAULT, NULL);
  *
  * // Configure the receiving node (EFR32XG22) for RF Sense.
@@ -3812,9 +3805,10 @@ RAIL_Status_t RAIL_StartSelectiveOokRfSense(RAIL_Handle_t railHandle,
  * @param[in] railHandle A handle for RAIL instance.
  * @return A status code indicating success of the function call.
  *
- * You can use this function to switch to the RFSENSE Selective(OOK) PHY for
- * waking up a chip that supports Selective RF energy detection (OOK mode).
- * You may only call this function while the radio is idle.
+ * This function switches to the RFSENSE Selective(OOK) PHY for transmitting a
+ * packet to wake up a chip that supports Selective RF energy detection (OOK
+ * mode). You may only call this function while the radio is idle. While the
+ * radio is configured for this PHY, receive functionality should not be used.
  *
  * @note The user must also set up the transmit FIFO, via
  * \ref RAIL_SetRfSenseSelectiveOokWakeupPayload, post this function call to
@@ -3829,7 +3823,6 @@ RAIL_Status_t RAIL_ConfigRfSenseSelectiveOokWakeupPhy(RAIL_Handle_t railHandle);
  * RF Sense Selective(OOK).
  *
  * @param[in] railHandle A handle for RAIL instance.
- * @param[in] preamble Preamble byte.
  * @param[in] numSyncwordBytes Syncword Length in bytes, 1-4 bytes.
  * @param[in] syncword  Syncword Value.
  * @return A status code indicating success of the function call.
@@ -3839,7 +3832,6 @@ RAIL_Status_t RAIL_ConfigRfSenseSelectiveOokWakeupPhy(RAIL_Handle_t railHandle);
  *
  */
 RAIL_Status_t RAIL_SetRfSenseSelectiveOokWakeupPayload(RAIL_Handle_t railHandle,
-                                                       uint8_t preamble,
                                                        uint8_t numSyncwordBytes,
                                                        uint32_t syncword);
 
@@ -4048,7 +4040,6 @@ RAIL_Status_t RAIL_EnableRxDutyCycle(RAIL_Handle_t railHandle,
  * Yields the radio to other configurations.
  *
  * @param[in] railHandle A RAIL instance handle.
- * @return void.
  *
  * This function is used to indicate that the previous transmit or scheduled
  * receive operation has completed. It must be used in multiprotocol RAIL since
@@ -4407,7 +4398,6 @@ RAIL_Status_t RAIL_OverrideDebugFrequency(RAIL_Handle_t railHandle,
  * @param[in] railHandle A RAIL instance handle.
  * @param[in] errorCode Value passed in by the calling assertion API indicating
  *   the RAIL error that is indicated by the failing assertion.
- * @return void.
  */
 void RAILCb_AssertFailed(RAIL_Handle_t railHandle,
                          RAIL_AssertErrorCodes_t errorCode);
@@ -4457,6 +4447,29 @@ RAIL_Status_t RAIL_GetThermistorImpedance(RAIL_Handle_t railHandle,
                                           uint32_t *thermistorImpedance);
 
 /** @} */ // end of group External_Thermistor
+
+/**
+ * @addtogroup Features
+ * @{
+ */
+
+/**
+ * Indicate whether this chip supports a particular power mode (PA).
+ *
+ * @param[in] railHandle A RAIL instance handle.
+ * @param[in] powerMode The power mode to check if supported.
+ * @param[out] pMaxPowerLevel A pointer to a \ref RAIL_TxPowerLevel_t that
+ *   if non-NULL will be filled in with the power mode's highest power level
+ *   allowed if this function returns true.
+ * @return true if the powerMode is supported; false otherwise.
+ *
+ * This function has no compile-time equivalent.
+ */
+bool RAIL_SupportsTxPowerMode(RAIL_Handle_t railHandle,
+                              RAIL_TxPowerMode_t powerMode,
+                              RAIL_TxPowerLevel_t *pMaxPowerLevel);
+
+/** @} */ // end of group Features
 
 /** @} */ // end of group RAIL_API
 
